@@ -1,18 +1,21 @@
+import java.util.ArrayList;
 
 public class Variable {
 
 	//private int domainLB;
 	//private int domainUB;
     private int id;
-	private int[] domain;
+	private ArrayList<Integer> domain;
 	
 	
 	public Variable(int id, int domainLB, int domainUB) {
 		this.id = id;
 		
-		this.domain = new int[domainUB - domainLB + 1];
+		this.domain = new ArrayList<>();
+		
+		//TODO dont need i
 		for (int i = 0, j = domainLB; j <= domainUB; i++, j++) {
-			this.domain[i] = j;
+		    domain.add(j);
 		}
 	}
 	
@@ -31,7 +34,7 @@ public class Variable {
 	}
 
 	public int getDomainLB() {
-		return this.domain[0];
+		return this.domain.get(0);
 	}
 
 //	public void setDomainLB(int domainLB) {
@@ -39,16 +42,21 @@ public class Variable {
 //	}
 
 	public int getDomainUB() {
-		return this.domain[this.domain.length];
+		return this.domain.get(this.domain.size());
 	}
 
 //	public void setDomainUB(int domainUB) {
 //		this.domainUB = domainUB;
 //	}
 
-	public int[] getDomain() {
+	public ArrayList<Integer> getDomain() {
 		return domain;
 	}
+
+    public void dropVal(int val) {
+        /* Need to convert to integer because remove(int) removes by index */
+        this.domain.remove(new Integer(val));
+    }
 	
 	
 }

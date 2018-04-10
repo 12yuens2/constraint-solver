@@ -14,12 +14,15 @@ public final class BinaryCSP {
         this.constraints = c;
     }
     
-    public void getArc(Variable v1, Variable v2) {
+    public ArrayList<BinaryTuple> getArcConstraints(Variable v1, Variable v2) {
         for (BinaryConstraint bc : constraints) {
             if (bc.getFirstVar() == v1.getId() && bc.getSecondVar() == v2.getId()) {
-                //return bc.getTuples();
+                return bc.getTuples();
             }
         }
+       
+        /* No constaints found for arc(v1,v2) */
+        return new ArrayList<>();
     }
   
     public String toString() {
