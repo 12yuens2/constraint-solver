@@ -18,7 +18,9 @@ public final class BinaryCSPReader {
       return ;
     }
     BinaryCSPReader reader = new BinaryCSPReader() ;
-	  System.out.println(reader.readBinaryCSP(args[0])) ;
+	BinaryCSP csp = reader.readBinaryCSP(args[0]);
+	
+	System.out.println(csp);
   }
 
   /**

@@ -1,3 +1,4 @@
+package generator;
 public final class LangfordsGenerator {
   
   public static void main (String[] args) {

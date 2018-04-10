@@ -1,3 +1,4 @@
+package generator;
 public final class SudokuGenerator {
   
   /**
