@@ -1,3 +1,4 @@
+package csp;
 import java.util.* ;
 
 public final class BinaryConstraint {

@@ -1,3 +1,4 @@
+package csp;
 import java.util.* ;
 
 public final class BinaryCSP {
@@ -16,6 +17,7 @@ public final class BinaryCSP {
     
     public ArrayList<BinaryTuple> getArcConstraints(Variable v1, Variable v2) {
         for (BinaryConstraint bc : constraints) {
+
             if (bc.getFirstVar() == v1.getId() && bc.getSecondVar() == v2.getId()) {
                 return bc.getTuples();
             }
@@ -33,13 +35,17 @@ public final class BinaryCSP {
             result.append("Var " + v.getId() + ": " + v.getDomain() + "\n");
         }
         
-        for (BinaryConstraint bc : constraints) {
-            result.append(bc+"\n");
-        }
+//        for (BinaryConstraint bc : constraints) {
+//            result.append(bc+"\n");
+//        }
         
         return result.toString();
     }
-  
+ 
+    public ArrayList<Variable> getVariables() {
+        return this.variables;
+    }
+    
     public int getNoVariables() {
         return variables.size();
     }

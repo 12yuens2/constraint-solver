@@ -1,5 +1,11 @@
+package util;
 import java.io.* ;
 import java.util.* ;
+
+import csp.BinaryCSP;
+import csp.BinaryConstraint;
+import csp.BinaryTuple;
+import solver.BinaryConstraintSolver;
 
 /**
  * A reader tailored for binary extensional CSPs.
@@ -19,8 +25,12 @@ public final class BinaryCSPReader {
     }
     BinaryCSPReader reader = new BinaryCSPReader() ;
 	BinaryCSP csp = reader.readBinaryCSP(args[0]);
-	
+
 	System.out.println(csp);
+	
+	BinaryConstraintSolver solver = new BinaryConstraintSolver();
+	solver.solveCSP(csp);
+	
   }
 
   /**

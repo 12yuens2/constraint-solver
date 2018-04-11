@@ -1,3 +1,4 @@
+package csp;
 /**
  * Assumes tuple values are integers
  */
