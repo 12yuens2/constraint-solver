@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import csp.BinaryCSP;
 import csp.BinaryTuple;
+import csp.Solution;
 import csp.Variable;
 
 public class BinaryConstraintSolver {
@@ -12,25 +13,34 @@ public class BinaryConstraintSolver {
     
     private BinaryCSP csp;
     private ArrayList<Integer> droppedVals;
-    
+    private ArrayList<Solution> solutions;
     private HashMap<Variable, UndoTracker> undoMap;
+    
     
 	public BinaryConstraintSolver() {
 		/* Heuristic/algorithm to choose */
 	    this.droppedVals = new ArrayList<>();
+	    this.solutions = new ArrayList<>();
 	    this.undoMap = new HashMap<>();
 	}
 	
 	
-	public void solveCSP(BinaryCSP csp) {
-		this.csp = csp;
-		initUndoMap();
+	public ArrayList<Solution> solveCSP(BinaryCSP csp) {
+		resetAll(csp);
 		forwardChecking(csp.getVariables());
 		
-		System.out.println(csp);
+		for (Solution s : solutions) {
+		    System.out.println(s);
+		}
+		
+		return solutions;
 	}
 	
-	private void initUndoMap() {
+	private void resetAll(BinaryCSP csp) {
+	    this.csp = csp;
+	    
+	    droppedVals.clear();
+	    solutions.clear();
 	    undoMap.clear();
 	    for (Variable v : csp.getVariables()) {
 	        undoMap.put(v, new UndoTracker());
@@ -40,12 +50,13 @@ public class BinaryConstraintSolver {
 	private void forwardChecking(ArrayList<Variable> variables) {
 	    System.out.println();
 	    if (completeAssignment()) {
-	        for (int i = 0; i < csp.getNoVariables(); i++) {
-	            Variable v = csp.getVariables().get(i);
-	            System.out.println("Var " + i + ": " + v.getAssignedValue());
-	        }
-	        System.out.println(csp);
-	        System.exit(0);
+	        solutions.add(new Solution(csp));
+//	        for (int i = 0; i < csp.getNoVariables(); i++) {
+//	            Variable v = csp.getVariables().get(i);
+//	            System.out.println("Var " + i + ": " + v.getAssignedValue());
+//	        }
+//	        System.out.println(csp);
+//	        System.exit(0);
 	    }
 	    
 		if (variables.isEmpty()) {
@@ -73,7 +84,6 @@ public class BinaryConstraintSolver {
 	}
 	
 	private void branchRight(ArrayList<Variable> variables, Variable var, int val) {
-	    System.out.println("Rbanch right");
 	    var.deleteValue(val);
 	    
 	    if (var.getDomain().size() > 0) {
