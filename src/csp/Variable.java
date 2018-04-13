@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.TreeSet;
 
+import util.Logger;
 import util.SortedArrayList;
 
 public class Variable {
@@ -76,7 +77,7 @@ public class Variable {
  * Variable assignment 
  */
     public void assignValue(int val) {
-        System.out.println("Assign var " + id + " with " + val);
+        Logger.log(Logger.MessageType.DEBUG, "Assign Var" + id + " with " + val);
         this.assignedValue = val;
         this.isAssigned = true;
     }
@@ -84,6 +85,10 @@ public class Variable {
     public void unassignValue(int val) {
         this.assignedValue = -1;
         this.isAssigned = false;
+    }
+    
+    public void setAssigned(boolean assigned) {
+        isAssigned = assigned;
     }
     
     public boolean isAssigned() {

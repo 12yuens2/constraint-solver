@@ -1,23 +1,27 @@
 package solver;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import csp.BinaryCSP;
 import csp.BinaryTuple;
 import csp.Solution;
 import csp.Variable;
+import util.Logger;
 
 public class BinaryConstraintSolver {
-
     
     private BinaryCSP csp;
     private ArrayList<Integer> droppedVals;
     private ArrayList<Solution> solutions;
     private HashMap<Variable, UndoTracker> undoMap;
-    
+  
+    private long timeTaken;
+    private int revisions;
+    private int nodes;
     
 	public BinaryConstraintSolver() {
+	    //Logger.displayMessage = true;
+	    
 		/* Heuristic/algorithm to choose */
 	    this.droppedVals = new ArrayList<>();
 	    this.solutions = new ArrayList<>();
@@ -27,12 +31,21 @@ public class BinaryConstraintSolver {
 	
 	public ArrayList<Solution> solveCSP(BinaryCSP csp) {
 		resetAll(csp);
+		long timeBefore = System.nanoTime();
 		forwardChecking(csp.getVariables());
+		long timeAfter = System.nanoTime();
 		
-		for (Solution s : solutions) {
-		    System.out.println(s);
-		}
+		timeTaken = timeAfter - timeBefore;
 		
+//		for (Solution s : solutions) {
+//		    System.out.println(s);
+//		}
+		Logger.displayMessage = true;
+		Logger.newline();
+		Logger.log(Logger.MessageType.DEBUG, "Time taken=" + timeTaken);
+		Logger.log(Logger.MessageType.DEBUG, "Search nodes=" + nodes);
+		Logger.log(Logger.MessageType.DEBUG, "Revisions=" + revisions);
+
 		return solutions;
 	}
 	
@@ -41,6 +54,7 @@ public class BinaryConstraintSolver {
 	    
 	    droppedVals.clear();
 	    solutions.clear();
+	    
 	    undoMap.clear();
 	    for (Variable v : csp.getVariables()) {
 	        undoMap.put(v, new UndoTracker());
@@ -48,29 +62,31 @@ public class BinaryConstraintSolver {
 	}
 	
 	private void forwardChecking(ArrayList<Variable> variables) {
-	    System.out.println();
+	    Logger.newline();
+	    Logger.log(Logger.MessageType.DEBUG, "Begin forward checking");
+	    
 	    if (completeAssignment()) {
+	        Logger.log(Logger.MessageType.DEBUG, "Found solution.");
 	        solutions.add(new Solution(csp));
-//	        for (int i = 0; i < csp.getNoVariables(); i++) {
-//	            Variable v = csp.getVariables().get(i);
-//	            System.out.println("Var " + i + ": " + v.getAssignedValue());
-//	        }
-//	        System.out.println(csp);
-//	        System.exit(0);
 	    }
 	    
 		if (variables.isEmpty()) {
 	        return;
 	    }
+		
+		/* New search node */
+		nodes++;
 	    
-	    Variable var = variables.get(0); //selectVar(variables); // select variable to assign
-	    int val = var.getDomain().first(); //selectVal(var.getDomain()); // select value from variable domain
+	    Variable var = csp.selectVar(variables);//variables.get(0); //selectVar(variables); // select variable to assign
+	    int val = csp.selectVal(var); //var.getDomain().first(); //selectVal(var.getDomain()); // select value from variable domain
 	    branchLeft(variables, var, val);
 	    branchRight(variables, var, val);
 	}
 	
+
 	
 	private void branchLeft(ArrayList<Variable> variables, Variable var, int val) {
+	    nodes++;
 	    var.assignValue(val);
 	    
 	    if (reviseFutureArcs(variables, var)) {
@@ -84,20 +100,21 @@ public class BinaryConstraintSolver {
 	}
 	
 	private void branchRight(ArrayList<Variable> variables, Variable var, int val) {
+	    nodes++;
 	    var.deleteValue(val);
 	    
 	    if (var.getDomain().size() > 0) {
-//	        if (reviseFutureArcs(variables, var)) {
+	        //if (reviseFutureArcs(variables, var)) {
 	            forwardChecking(variables);
-//	        }
-//	        undoPruning(var);
+	        //}
+	        //undoPruning(var);
 	    }
 	    var.restoreValue(val);
 	}
 	
 	private boolean reviseFutureArcs(ArrayList<Variable> variables, Variable var) {
-	    System.out.println("Future arcs for: " + var);
-	    System.out.println(variables);
+	    Logger.log(Logger.MessageType.DEBUG, "Future arcs for: " + var);
+	    Logger.log(Logger.MessageType.DEBUG, "Variables: " + variables);
 	    
 	    boolean consistent = true;
 	    for (Variable futureVar : variables) {
@@ -110,7 +127,6 @@ public class BinaryConstraintSolver {
 	}
 	
 	private boolean revise(Variable futureVar, Variable var) {
-	    //csp.getcon
 	    if (var.isAssigned()) {
 	        return !reviseConstraint(futureVar, var, var.getAssignedValue());
 	    } 
@@ -119,11 +135,8 @@ public class BinaryConstraintSolver {
 	        for (int val : var.getDomain()) {
 	            if (reviseConstraint(futureVar, var, val)) {
 	                toDrop.add(val);
-//	                var.deleteValue(val);
-//	                droppedVals.add(val);
 	            }
 	        }
-	        
 	        for (int i : toDrop) {
 	            var.deleteValue(i);
 	            droppedVals.add(i);
@@ -137,15 +150,18 @@ public class BinaryConstraintSolver {
 	}
 	
 	private boolean reviseConstraint(Variable futureVar, Variable var, int val) {
+	    revisions++;
 	    ArrayList<Integer> allowedFutureVals = getAllowedValues(var, futureVar, val);
 	    
+	    /* No constraints between this arc */
 	    if (allowedFutureVals == null) {
-	        /* No constraints between this arc */
+	        Logger.log(Logger.MessageType.WARN, "No constraints found for variables Var" + var.getId() + " and Var" + futureVar.getId());
 	        return false;
 	    }
 	    
+	    /* Domain wipeout */
 	    if (allowedFutureVals.isEmpty()) {
-	        /* Domain wipeout */
+	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout from constraints");
 	        return true;
 	    }
 
@@ -162,22 +178,13 @@ public class BinaryConstraintSolver {
 	    UndoTracker tracker = undoMap.get(var);
 	    for (int droppedVal : valsToDrop) {
 	        tracker.trackValue(futureVar, droppedVal);
-//	        if (droppedFutureVals.containsKey(futureVar)) {
-//	            if (!droppedFutureVals.get(futureVar).contains(droppedVal)) {
-//	                droppedFutureVals.get(futureVar).add(droppedVal);
-//	            }
-//	        }
-//	        else {
-//	            ArrayList<Integer> l = new ArrayList<Integer>();
-//	            l.add(droppedVal);
-//	            droppedFutureVals.put(futureVar, l);
-//	        }
 	    }
-	    System.out.println("Revise: " + futureVar);
+	    Logger.log(Logger.MessageType.DEBUG, "Revise: " + futureVar);
 	    
+	    
+	    /* Domain wipeout */
 	    if (futureVar.getDomain().isEmpty()) {
-	        /* Domain wipeout */
-	        System.out.println("wipeout");
+	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout from revision");
 	        return true;
 	    }
 	    
@@ -209,7 +216,6 @@ public class BinaryConstraintSolver {
 	    }
 	    droppedVals.clear();
 	   
-//	    System.out.println(droppedFutureVals);
 	    undoMap.get(var).undo();
 	}
 	

@@ -45,27 +45,27 @@ public class NQueensTest {
         assertEquals(fExpected, queensSolutions.size());
     }
         
-    @Test
-    public void test4Queens() {
-        BinaryCSP fourQueensCSP = getCSP("csp/4Queens.csp");
-        ArrayList<Solution> fourQueensSolutions = solver.solveCSP(fourQueensCSP);
-       
-        /* First solution */
-        Solution s1 = fourQueensSolutions.get(0);
-        ArrayList<Variable> rows = getQueensRows(s1, 4);
-        assertEquals(1, s1.getVarValue(rows.get(0)));
-        assertEquals(3, s1.getVarValue(rows.get(1)));
-        assertEquals(0, s1.getVarValue(rows.get(2)));
-        assertEquals(2, s1.getVarValue(rows.get(3)));
-        
-        /* Second solution */
-        Solution s2 = fourQueensSolutions.get(1);
-        rows = getQueensRows(s1, 4);
-        assertEquals(2, s2.getVarValue(rows.get(0)));
-        assertEquals(0, s2.getVarValue(rows.get(1)));
-        assertEquals(3, s2.getVarValue(rows.get(2)));
-        assertEquals(1, s2.getVarValue(rows.get(3)));
-    }
+//    @Test
+//    public void test4Queens() {
+//        BinaryCSP fourQueensCSP = getCSP("csp/4Queens.csp");
+//        ArrayList<Solution> fourQueensSolutions = solver.solveCSP(fourQueensCSP);
+//       
+//        /* First solution */
+//        Solution s1 = fourQueensSolutions.get(0);
+//        ArrayList<Variable> rows = getQueensRows(s1, 4);
+//        assertEquals(1, s1.getVarValue(rows.get(0)));
+//        assertEquals(3, s1.getVarValue(rows.get(1)));
+//        assertEquals(0, s1.getVarValue(rows.get(2)));
+//        assertEquals(2, s1.getVarValue(rows.get(3)));
+//        
+//        /* Second solution */
+//        Solution s2 = fourQueensSolutions.get(1);
+//        rows = getQueensRows(s1, 4);
+//        assertEquals(2, s2.getVarValue(rows.get(0)));
+//        assertEquals(0, s2.getVarValue(rows.get(1)));
+//        assertEquals(3, s2.getVarValue(rows.get(2)));
+//        assertEquals(1, s2.getVarValue(rows.get(3)));
+//    }
     
     private static BinaryCSP getCSP(String filename) {
         return reader.readBinaryCSP(filename);

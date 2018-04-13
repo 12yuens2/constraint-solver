@@ -1,11 +1,17 @@
 package csp;
 import java.util.* ;
 
+import csp.heuristic.Heuristic;
+import csp.heuristic.impl.NoHeuristic;
+import csp.heuristic.impl.SmallestDomainFirst;
+
 public final class BinaryCSP {
+    private Heuristic heuristic;
     private ArrayList<Variable> variables;
     private ArrayList<BinaryConstraint> constraints;
   
     public BinaryCSP(int[][] db, ArrayList<BinaryConstraint> c) {
+        this.heuristic = new NoHeuristic();
         this.variables = new ArrayList<>();
         for (int i = 0; i < db.length; i++) {
             Variable v = new Variable(i, db[i][0], db[i][1]);
@@ -18,7 +24,9 @@ public final class BinaryCSP {
     public ArrayList<BinaryTuple> getArcConstraints(Variable v1, Variable v2) {
         for (BinaryConstraint bc : constraints) {
 
-            if (bc.getFirstVar() == v1.getId() && bc.getSecondVar() == v2.getId()) {
+            /* Constraints can go both directions */
+            if (bc.getFirstVar() == v1.getId() && bc.getSecondVar() == v2.getId()
+                || bc.getFirstVar() == v2.getId() && bc.getSecondVar() == v1.getId()) {
                 return bc.getTuples();
             }
         }
@@ -26,7 +34,8 @@ public final class BinaryCSP {
         /* No constaints found for arc(v1,v2) */
         return new ArrayList<>();
     }
-  
+ 
+    @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
         result.append("CSP:\n");
@@ -41,7 +50,19 @@ public final class BinaryCSP {
         
         return result.toString();
     }
- 
+
+    public Heuristic getHeuristic() {
+        return this.heuristic;
+    }
+    
+    public Variable selectVar(ArrayList<Variable> variables) {
+        return heuristic.getNextVariable(variables);
+    }
+    
+    public int selectVal(Variable var) {
+        return heuristic.getNextVariable(var.getDomain());
+    }
+    
     public ArrayList<Variable> getVariables() {
         return this.variables;
     }
