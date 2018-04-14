@@ -12,14 +12,64 @@
 \usepackage{parskip}
 \usepackage{fancyhdr}
 \usepackage{vmargin}
-%\usepackage[backend=biber]{biblatex}
-%\addbibresource{references.bib}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{references.bib}
 
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 
+% Plots
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{filter discard warning=false}
+\pgfplotsset{
+    discard if/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    },
+    discard if not/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+            \else
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    },
+    discard if smaller/.style n args={2}{
+    	x filter/.code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+                \ifnum\tempa<\tempb
+                    \def\pgfmathresult{inf}
+                \else
+                \fi
+        }
+    },
+    discard if larger/.style n args={2}{
+    	x filter/.code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+                \ifnum\tempa>\tempb
+                    \def\pgfmathresult{inf}
+                \else
+                \fi
+        }
+    }
+}
+
+
+% Listings
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 
 \lstset{frame=tb,
   numbers=left,

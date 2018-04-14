@@ -32,7 +32,7 @@ public final class BinaryCSPReader {
     }
     BinaryCSPReader reader = new BinaryCSPReader() ;
 	BinaryCSP csp = reader.readBinaryCSP(args[0]);
-	csp.setHeuristic(new SmallestDomainFirst());
+	csp.setHeuristic(new RandomHeuristic());
 	System.out.println(csp);
 	System.out.println(csp.getHeuristic());
 	
@@ -40,7 +40,7 @@ public final class BinaryCSPReader {
 	solver.solveCSP(csp);
 	
   }
-
+  
   /**
    * File format:
    * <no. vars>

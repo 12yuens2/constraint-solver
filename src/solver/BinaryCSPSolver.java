@@ -40,11 +40,10 @@ public class BinaryCSPSolver {
 		
 		timeTaken = timeAfter - timeBefore;
 
-		System.out.println(csp);
 		for (Solution s : solutions) {
 		    System.out.println(s);
 		}
-//		Logger.displayMessage = true;
+		Logger.displayMessage = true;
 		Logger.newline();
 		Logger.log(Logger.MessageType.INFO, "Problem=" + csp.getName());
 		Logger.log(Logger.MessageType.INFO, "Time taken=" + timeTaken);
@@ -79,24 +78,25 @@ public class BinaryCSPSolver {
 	        solutions.add(new Solution(csp));
 	    }
 	    
-		if (variables.isEmpty()) {
-		    Logger.log(Logger.MessageType.DEBUG, "No solution, return up.");
+	    else if (variables.isEmpty()) {
+		    Logger.log(Logger.MessageType.DEBUG, "No more variables, return up.");
 	        return;
 	    }
-		
-		/* New search node */
-		nodes++;
 	    
-	    Variable var = csp.selectVar(variables);
-	    int val = csp.selectVal(var); 
-	    branchLeft(variables, var, val);
-	    branchRight(variables, var, val);
+	    else {
+            /* New search node */
+            nodes++;
+            
+            Variable var = csp.selectVar(variables);
+            int val = csp.selectVal(var); 
+            branchLeft(variables, var, val);
+            branchRight(variables, var, val);
+	    } 
 	}
 	
 
 	
 	private void branchLeft(ArrayList<Variable> variables, Variable var, int val) {
-	    nodes++;
 	    var.assignValue(val);
 	    
 	    if (reviseFutureArcs(variables, var)) {
@@ -110,13 +110,14 @@ public class BinaryCSPSolver {
 	}
 	
 	private void branchRight(ArrayList<Variable> variables, Variable var, int val) {
-	    nodes++;
 	    var.deleteValue(val);
 	    
-	    if (var.getDomain().size() > 0) {
-//	        if (reviseFutureArcs(variables, var)) {
+	    if (!var.getDomain().isEmpty()) {
+	        if (reviseFutureArcs(variables, var)) {
+	            System.out.println("ERERE");
+	            System.out.println(var.getDomain().isEmpty());
 	            forwardChecking(variables);
-//	        }
+	        }
 	        undoPruning(var);
 	    }
 	    var.restoreValue(val);

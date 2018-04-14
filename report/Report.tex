@@ -23,16 +23,138 @@ In this practical, a forward checking constraint solver with 2-way branching is 
 \section{Design and Implementation}
 
 \subsection{2 way forward checking}
+The 2 way forward checking algorithm was implemented from the following pseudo-code:
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{ForwardChecking}{\textit{varList}}
+\If{completeAssignment()}
+	\State addSolution()
+\ElsIf{empty(\textit{varList})}
+	\Return
+\Else
+	\State \textit{var} \gets selectVar(\textit{varList})
+	\State \textit{val} \gets selectVal(domain(\textit{var}))
+	\State branchFCLeft(\textit{varList}, \textit{var}, \textit{val})
+	\State branchFCRight(\textit{varList}, \textit{var}, \textit{val})
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\caption{2-way forward checking algorithm, adapted from lecture slides by Ian Miguel.}
+\end{algorithm}
+
+
+\begin{algorithm}
+\begin{algorithmic}[2]
+\Procedure{Revise}{\textit{Arc($var_1$, $var_2$)}}
+\State \textit{val} \gets $var_1$.assignedValue()
+\State \textit{constraints} \gets getArcConstraints(Arc($var_1$, $var_2$))
+\If{empty(\textit{constraints})}
+	\Return False
+\Else
+	\For{each constraint \textit{c} in \textit{constraints}}
+		\For{each value \textit{v} in domain($var_2$)}
+			\If{$\neg$constraintHolds(\textit{c}, \textit{v})}
+				dropVal($var_2$, \textit{v})
+			\EndIf
+		\EndFor
+	\EndFor
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\caption{Algorithm for revising an arc.}
+\end{algorithm}
+
+There is a distinction between no arc existing between two variables and no constraints in an arc between two variables. An example of the first case is common in Sudoku problems, where two cells that don't share the same row, column or grid do not have an arc between them as they do not affect each other. An example of the latter case is in the 2-queens problem, where there are no constraints specified between the first and second row, because there are no valid values for either. 
 
 \subsection{Heuristics}
 
 \subsection{Maintain arc consistency (MAC)}
 
-\section{Results}
+\section{Experimental methodology}
 
+\subsection{Testing}
+To make sure that the constraint solver worked as intended, JUnit tests were written. Because the constraints problems and solutions can be very large, it was not feasible to write tests that checked the correctness of all solutions. However, smaller problems such as the 4Queens problem could be tested. Furthermore, the solver can be specified to output all solutions in which case the number of solutions (including all symmetrical solutions) can be tested to ensure the correct number of solutions were found. 
+
+\subsection{Metrics used}
+
+Multiple metrics were used to empirically measure the performance of different heuristics
+
+\subsection{Experiments}
+Multiple runs of the experiments were done to ensure reliable results for the time taken metric. Although a robust benchmarking framework was not used, warm up iterations were added as part of the experiments due to benchmarking complications on the JVM \cite{jvm-benchmark}. 
+\n
+The number of search nodes and revisions did not require multiple iterations because they are deterministic. However a ``random" heuristic that random chooses the next variable to assign would require the extra runs to determine the average nodes and arc revisions.
+
+\section{Results and analysis}
+
+% #1 - Plot title
+% #2 - x axis data
+% #3 - y axis data
+% #4 - csv file
+\newcommand{\cspplot}[4]{
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{#1}},
+	legend pos=south east,
+	ymode=log,
+	xlabel={#2},
+	ylabel={#3}
+]
+
+\addplot+[only marks, fill opacity=0.2,
+		discard if not={Heuristic}{Smallest Domain First},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{SDF}
+
+\addplot+[only marks, fill opacity=0.2,
+		discard if not={Heuristic}{No heuristic},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{No heuristic}
+
+\addplot+[only marks, fill opacity=0.2,
+		discard if not={Heuristic}{Random},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Random}
+
+\end{axis}
+\end{tikzpicture}
+}
+
+\begin{figure}[H]
+\centering
+\cspplot{N queens problem}{Instance}{SolverNodes}{queens.csv}
+\caption{}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\cspplot{N queens problem}{Instance}{ArcRevisions}{queens.csv}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\cspplot{N queens problem}{Instance}{SolverTime}{queens.csv}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\cspplot{N queens problem}{SolverTime}{SolverNodes}{queens.csv}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\cspplot{N queens problem}{SolverTime}{ArcRevisions}{queens.csv}
+\caption{}
+\end{figure}
 \section{Conclusion and evaluation}
 
-%\printbibliography
+\printbibliography
 
 \end{document}
 
