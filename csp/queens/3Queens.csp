@@ -1,0 +1,25 @@
+//3-Queens.
+
+// Number of variables:
+3
+
+// Domains of the variables: 0.. (inclusive)
+0, 2
+0, 2
+0, 2
+
+// constraints (vars indexed from 0, allowed tuples):
+c(0, 1)
+0, 2
+2, 0
+
+c(0, 2)
+0, 1
+1, 0
+1, 2
+2, 1
+
+c(1, 2)
+0, 2
+2, 0
+
