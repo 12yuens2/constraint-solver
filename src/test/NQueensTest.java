@@ -15,7 +15,12 @@ import org.junit.runners.Parameterized.Parameters;
 import csp.BinaryCSP;
 import csp.Solution;
 import csp.Variable;
-import solver.BinaryConstraintSolver;
+import csp.heuristic.Heuristic;
+import csp.heuristic.impl.LargestValueFirst;
+import csp.heuristic.impl.NoHeuristic;
+import csp.heuristic.impl.RandomHeuristic;
+import csp.heuristic.impl.SmallestDomainFirst;
+import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 
 @RunWith(Parameterized.class)
@@ -23,11 +28,11 @@ public class NQueensTest {
     @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                {4, 2}, {6, 4}, {8, 92}, {10, 724}
+                {1, 1}, {2, 0}, {3, 0}, {4, 2}, {5, 10}, {6, 4}, {7, 40}, {8, 92}, {9, 352}, {10, 724}
            });
     }
     private static BinaryCSPReader reader = new BinaryCSPReader();
-    private static BinaryConstraintSolver solver = new BinaryConstraintSolver();
+    private static BinaryCSPSolver solver = new BinaryCSPSolver(true);
     
     private int fInput;
     private int fExpected;
@@ -36,15 +41,36 @@ public class NQueensTest {
         fInput= input;
         fExpected= expected;
     }
-
-    @Test
-    public void test() {
-        BinaryCSP queensCSP = getCSP("csp/" + fInput + "Queens.csp");
-        ArrayList<Solution> queensSolutions = solver.solveCSP(queensCSP);
+    
+    private void numSolutionsTest(Heuristic heuristic) {
+        BinaryCSP queensCSP = getCSP("csp/queens/" + fInput + "Queens.csp");
         
+        queensCSP.setHeuristic(heuristic);
+        
+        ArrayList<Solution> queensSolutions = solver.solveCSP(queensCSP);
         assertEquals(fExpected, queensSolutions.size());
     }
-        
+
+    @Test
+    public void noHeuristicTest() {
+        numSolutionsTest(new NoHeuristic());
+    }
+    
+    @Test
+    public void sdfHeuristicTest() {
+        numSolutionsTest(new SmallestDomainFirst());
+    }
+    
+    @Test
+    public void randomHeuristicTest() {
+        numSolutionsTest(new RandomHeuristic());
+    }
+    
+    @Test
+    public void largestValueHeuristicTest() {
+        numSolutionsTest(new LargestValueFirst());
+    }
+    
 //    @Test
 //    public void test4Queens() {
 //        BinaryCSP fourQueensCSP = getCSP("csp/4Queens.csp");

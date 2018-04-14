@@ -6,12 +6,17 @@ import csp.heuristic.impl.NoHeuristic;
 import csp.heuristic.impl.SmallestDomainFirst;
 
 public final class BinaryCSP {
+    
+    private String name;
+    
     private Heuristic heuristic;
     private ArrayList<Variable> variables;
     private ArrayList<BinaryConstraint> constraints;
   
-    public BinaryCSP(int[][] db, ArrayList<BinaryConstraint> c) {
-        this.heuristic = new NoHeuristic();
+    public BinaryCSP(String name, Heuristic heuristic, int[][] db, ArrayList<BinaryConstraint> c) {
+        this.name = name;
+        
+        this.heuristic = heuristic;
         this.variables = new ArrayList<>();
         for (int i = 0; i < db.length; i++) {
             Variable v = new Variable(i, db[i][0], db[i][1]);
@@ -32,7 +37,7 @@ public final class BinaryCSP {
         }
        
         /* No constaints found for arc(v1,v2) */
-        return new ArrayList<>();
+        return null;
     }
  
     @Override
@@ -51,6 +56,14 @@ public final class BinaryCSP {
         return result.toString();
     }
 
+    public String getName() {
+        return name;
+    }
+   
+    public void setHeuristic(Heuristic heuristic) {
+        this.heuristic = heuristic;
+    }
+    
     public Heuristic getHeuristic() {
         return this.heuristic;
     }
@@ -60,7 +73,7 @@ public final class BinaryCSP {
     }
     
     public int selectVal(Variable var) {
-        return heuristic.getNextVariable(var.getDomain());
+        return heuristic.getNextValue(var.getDomain());
     }
     
     public ArrayList<Variable> getVariables() {

@@ -20,6 +20,12 @@ public interface Heuristic {
      * @param domain - Domain the value can be chosen from
      * @return chosen value
      */
-    public abstract int getNextVariable(TreeSet<Integer> domain);
+    public abstract int getNextValue(TreeSet<Integer> domain);
     
+    /**
+     * Override toString to only return name of the heuristic
+     * @return
+     */
+    @Override
+    public String toString();
 }

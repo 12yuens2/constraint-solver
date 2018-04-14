@@ -14,19 +14,21 @@ import org.junit.runners.Parameterized.Parameters;
 import csp.BinaryCSP;
 import csp.Solution;
 import csp.Variable;
-import solver.BinaryConstraintSolver;
+import csp.heuristic.impl.SmallestDomainFirst;
+import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 
 
 public class FourQueensTest {
 
     private static BinaryCSPReader reader = new BinaryCSPReader();
-    private static BinaryConstraintSolver solver = new BinaryConstraintSolver();
+    private static BinaryCSPSolver solver = new BinaryCSPSolver(true);
    
     private ArrayList<Solution> solutions;
 
     public FourQueensTest() {
-        BinaryCSP fourQueensCSP = getCSP("csp/4Queens.csp");
+        BinaryCSP fourQueensCSP = getCSP("csp/queens/4Queens.csp");
+        fourQueensCSP.setHeuristic(new SmallestDomainFirst());
         this.solutions = solver.solveCSP(fourQueensCSP); 
     }
     

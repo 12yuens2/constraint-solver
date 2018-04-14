@@ -8,19 +8,20 @@ import csp.Solution;
 import csp.Variable;
 import util.Logger;
 
-public class BinaryConstraintSolver {
-    
+public class BinaryCSPSolver {
+   
     private BinaryCSP csp;
     private ArrayList<Integer> droppedVals;
     private ArrayList<Solution> solutions;
     private HashMap<Variable, UndoTracker> undoMap;
   
+    private boolean allSolutions;
     private long timeTaken;
     private int revisions;
     private int nodes;
     
-	public BinaryConstraintSolver() {
-	    //Logger.displayMessage = true;
+	public BinaryCSPSolver(boolean getAllSolutions) {
+	    this.allSolutions = getAllSolutions;
 	    
 		/* Heuristic/algorithm to choose */
 	    this.droppedVals = new ArrayList<>();
@@ -30,27 +31,35 @@ public class BinaryConstraintSolver {
 	
 	
 	public ArrayList<Solution> solveCSP(BinaryCSP csp) {
+	    Logger.displayMessage = true;
+	    
 		resetAll(csp);
 		long timeBefore = System.nanoTime();
 		forwardChecking(csp.getVariables());
 		long timeAfter = System.nanoTime();
 		
 		timeTaken = timeAfter - timeBefore;
-		
-//		for (Solution s : solutions) {
-//		    System.out.println(s);
-//		}
-		Logger.displayMessage = true;
-		Logger.newline();
-		Logger.log(Logger.MessageType.DEBUG, "Time taken=" + timeTaken);
-		Logger.log(Logger.MessageType.DEBUG, "Search nodes=" + nodes);
-		Logger.log(Logger.MessageType.DEBUG, "Revisions=" + revisions);
 
+		System.out.println(csp);
+		for (Solution s : solutions) {
+		    System.out.println(s);
+		}
+//		Logger.displayMessage = true;
+		Logger.newline();
+		Logger.log(Logger.MessageType.INFO, "Problem=" + csp.getName());
+		Logger.log(Logger.MessageType.INFO, "Time taken=" + timeTaken);
+		Logger.log(Logger.MessageType.INFO, "Search nodes=" + nodes);
+		Logger.log(Logger.MessageType.INFO, "Revisions=" + revisions);
+		Logger.log(Logger.MessageType.INFO, "Solutions=" + solutions.size());
 		return solutions;
 	}
 	
 	private void resetAll(BinaryCSP csp) {
 	    this.csp = csp;
+	    
+	    timeTaken = 0;
+	    nodes = 0;
+	    revisions = 0;
 	    
 	    droppedVals.clear();
 	    solutions.clear();
@@ -71,14 +80,15 @@ public class BinaryConstraintSolver {
 	    }
 	    
 		if (variables.isEmpty()) {
+		    Logger.log(Logger.MessageType.DEBUG, "No solution, return up.");
 	        return;
 	    }
 		
 		/* New search node */
 		nodes++;
 	    
-	    Variable var = csp.selectVar(variables);//variables.get(0); //selectVar(variables); // select variable to assign
-	    int val = csp.selectVal(var); //var.getDomain().first(); //selectVal(var.getDomain()); // select value from variable domain
+	    Variable var = csp.selectVar(variables);
+	    int val = csp.selectVal(var); 
 	    branchLeft(variables, var, val);
 	    branchRight(variables, var, val);
 	}
@@ -104,10 +114,10 @@ public class BinaryConstraintSolver {
 	    var.deleteValue(val);
 	    
 	    if (var.getDomain().size() > 0) {
-	        //if (reviseFutureArcs(variables, var)) {
+//	        if (reviseFutureArcs(variables, var)) {
 	            forwardChecking(variables);
-	        //}
-	        //undoPruning(var);
+//	        }
+	        undoPruning(var);
 	    }
 	    var.restoreValue(val);
 	}
@@ -161,7 +171,7 @@ public class BinaryConstraintSolver {
 	    
 	    /* Domain wipeout */
 	    if (allowedFutureVals.isEmpty()) {
-	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout from constraints");
+	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout for futureVar" + futureVar.getId() + " from constraints");
 	        return true;
 	    }
 
@@ -196,8 +206,12 @@ public class BinaryConstraintSolver {
 	    ArrayList<BinaryTuple> constraints = csp.getArcConstraints(v1, v2);
 	    ArrayList<Integer> allowedValues = new ArrayList<>();
 	   
+	    if (constraints == null) {
+	        return null;
+	    }
 	    if (constraints.isEmpty()) {
-	        return null; //TODO refactor without using null to represent no constraints
+	        return new ArrayList<>();
+	        //return null; //TODO refactor without using null to represent no constraints
 	    }
 	    
 	    /* Add to list of allowed values if first value matches given value */
@@ -228,4 +242,35 @@ public class BinaryConstraintSolver {
 	    
 	    return true;
 	}
+	
+	
+	
+/*
+ * Getters and setters
+ */
+	
+	
+	public void setAllSolutions(boolean getAllSolutions) {
+	    this.allSolutions = getAllSolutions;
+	}
+	
+    public long getTimeTaken() {
+        return timeTaken;
+    }
+
+    public int getRevisions() {
+        return revisions;
+    }
+
+    public int getNodes() {
+        return nodes;
+    }
+    
+    public int getNumSolutions() {
+        return solutions.size();
+    }
+    
+    public ArrayList<Solution> getSolutions() {
+        return solutions;
+    }
 }

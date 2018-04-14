@@ -5,13 +5,20 @@ import java.util.* ;
 import csp.BinaryCSP;
 import csp.BinaryConstraint;
 import csp.BinaryTuple;
-import solver.BinaryConstraintSolver;
+import csp.heuristic.impl.LargestValueFirst;
+import csp.heuristic.impl.NoHeuristic;
+import csp.heuristic.impl.RandomHeuristic;
+import csp.heuristic.impl.SmallestDomainFirst;
+import solver.BinaryCSPSolver;
 
 /**
  * A reader tailored for binary extensional CSPs.
  * It is created from a FileReader and a StreamTokenizer
  */
 public final class BinaryCSPReader {
+    
+  public static final String CSP_PATH = "csp/";
+    
   private FileReader inFR ;
   private StreamTokenizer in ;
 
@@ -25,10 +32,11 @@ public final class BinaryCSPReader {
     }
     BinaryCSPReader reader = new BinaryCSPReader() ;
 	BinaryCSP csp = reader.readBinaryCSP(args[0]);
-
+	csp.setHeuristic(new SmallestDomainFirst());
 	System.out.println(csp);
+	System.out.println(csp.getHeuristic());
 	
-	BinaryConstraintSolver solver = new BinaryConstraintSolver();
+	BinaryCSPSolver solver = new BinaryCSPSolver(false);
 	solver.solveCSP(csp);
 	
   }
@@ -61,7 +69,7 @@ public final class BinaryCSPReader {
 	      domainBounds[i][1] = (int)in.nval ;
       }
       ArrayList<BinaryConstraint> constraints = readBinaryConstraints() ;
-      BinaryCSP csp = new BinaryCSP(domainBounds, constraints) ;
+      BinaryCSP csp = new BinaryCSP(fn, null, domainBounds, constraints) ;
       // TESTING:
       // System.out.println(csp) ;
       inFR.close() ;

@@ -42,29 +42,7 @@ public class Variable {
 	    return "Var " + id + ": " + domain;
 	}
 	
-	public int getId() {
-	    return this.id;
-	}
-	
-	public void setId(int id) {
-	    this.id = id;
-	}
 
-	public int getDomainLB() {
-	    return this.domain.first();
-	}
-
-	public int getDomainUB() {
-	    return this.domain.last();
-	}
-
-	public TreeSet<Integer> getDomain() {
-		return this.domain;
-	}
-	
-	public int getAssignedValue() {
-	    return this.assignedValue;
-	}
 
     public boolean dropVal(int val) {
         /* Need to convert to integer because remove(int) removes by index */
@@ -117,5 +95,33 @@ public class Variable {
     public void restoreValue(int val) {
         this.domain.add(val);
     }
+
+    
+/*
+ * Getters and setters
+ */
+    
+    public int getId() {
+	    return this.id;
+	}
 	
+	public void setId(int id) {
+	    this.id = id;
+	}
+
+	public int getDomainLB() {
+	    return this.domain.first();
+	}
+
+	public int getDomainUB() {
+	    return this.domain.last();
+	}
+
+	public TreeSet<Integer> getDomain() {
+		return this.domain;
+	}
+	
+	public int getAssignedValue() {
+	    return this.assignedValue;
+	}
 }
