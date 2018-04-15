@@ -79,6 +79,7 @@ public class Variable {
      * @return false if value is not in domain, true otherwise.
      */
     public boolean deleteValue(int val) {
+        Logger.log(Logger.MessageType.DEBUG, "Delete " + val + " from Var" + id);
         if (this.domain.contains(val)) {
             this.domain.remove(new Integer(val));
             return true;

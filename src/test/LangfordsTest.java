@@ -25,7 +25,7 @@ public class LangfordsTest {
     @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                {"2_3", 2}, {"2_4", 2}, {"2_5", 0}, {"2_6", 0}
+                {"2_3", 16}, {"2_4", 32}, {"2_5", 0}, {"2_6", 0}
            });
     }
     private static BinaryCSPReader reader = new BinaryCSPReader();

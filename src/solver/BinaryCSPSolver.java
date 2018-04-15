@@ -31,7 +31,7 @@ public class BinaryCSPSolver {
 	
 	
 	public ArrayList<Solution> solveCSP(BinaryCSP csp) {
-	    Logger.displayMessage = true;
+//	    Logger.displayMessage = true;
 	    
 		resetAll(csp);
 		long timeBefore = System.nanoTime();
@@ -43,7 +43,7 @@ public class BinaryCSPSolver {
 		for (Solution s : solutions) {
 		    System.out.println(s);
 		}
-		Logger.displayMessage = true;
+//		Logger.displayMessage = true;
 		Logger.newline();
 		Logger.log(Logger.MessageType.INFO, "Problem=" + csp.getName());
 		Logger.log(Logger.MessageType.INFO, "Time taken=" + timeTaken);
@@ -76,6 +76,8 @@ public class BinaryCSPSolver {
 	    if (completeAssignment()) {
 	        Logger.log(Logger.MessageType.DEBUG, "Found solution.");
 	        solutions.add(new Solution(csp));
+	        
+	        return;
 	    }
 	    
 	    else if (variables.isEmpty()) {
@@ -114,8 +116,6 @@ public class BinaryCSPSolver {
 	    
 	    if (!var.getDomain().isEmpty()) {
 	        if (reviseFutureArcs(variables, var)) {
-	            System.out.println("ERERE");
-	            System.out.println(var.getDomain().isEmpty());
 	            forwardChecking(variables);
 	        }
 	        undoPruning(var);
@@ -139,21 +139,26 @@ public class BinaryCSPSolver {
 	
 	private boolean revise(Variable futureVar, Variable var) {
 	    if (var.isAssigned()) {
-	        return !reviseConstraint(futureVar, var, var.getAssignedValue());
+	        return reviseConstraint(futureVar, var, var.getAssignedValue());
 	    } 
 	    else {
 	        ArrayList<Integer> toDrop = new ArrayList<>();
 	        for (int val : var.getDomain()) {
-	            if (reviseConstraint(futureVar, var, val)) {
+	            if (!reviseConstraint(futureVar, var, val)) {
 	                toDrop.add(val);
+//	                return false;
 	            }
 	        }
-	        for (int i : toDrop) {
-	            var.deleteValue(i);
-	            droppedVals.add(i);
-	        }
 	        
-	        return true;
+//	        return !futureVar.getDomain().isEmpty();
+//	        for (int i : toDrop) {
+//	            var.deleteValue(i);
+//	            undoMap.get(var).trackValue(var, i);
+//	        }
+	        
+	        undoPruning(var);
+//	        undoPruning(futureVar);
+	        return !var.getDomain().isEmpty();
 	    }
 	    // revise arc by removing values from variable domains
 	    // prune domain of futureVar
@@ -167,13 +172,13 @@ public class BinaryCSPSolver {
 	    /* No constraints between this arc */
 	    if (allowedFutureVals == null) {
 	        Logger.log(Logger.MessageType.WARN, "No constraints found for variables Var" + var.getId() + " and Var" + futureVar.getId());
-	        return false;
+	        return true;
 	    }
 	    
 	    /* Domain wipeout */
 	    if (allowedFutureVals.isEmpty()) {
 	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout for futureVar" + futureVar.getId() + " from constraints");
-	        return true;
+	        return false;
 	    }
 
 	    ArrayList<Integer> valsToDrop = new ArrayList<>();
@@ -183,9 +188,10 @@ public class BinaryCSPSolver {
 	            valsToDrop.add(futureVal);
 	        }
 	    }
-	    
-	    futureVar.getDomain().removeAll(valsToDrop);
 	   
+	    /* Remove values from future domain, if it is empty, then the arc is not consistent */
+	    futureVar.getDomain().removeAll(valsToDrop);
+
 	    UndoTracker tracker = undoMap.get(var);
 	    for (int droppedVal : valsToDrop) {
 	        tracker.trackValue(futureVar, droppedVal);
@@ -196,41 +202,46 @@ public class BinaryCSPSolver {
 	    /* Domain wipeout */
 	    if (futureVar.getDomain().isEmpty()) {
 	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout from revision");
-	        return true;
+	        return false;
 	    }
-	    
-                
-        return false;
+        
+        return true;
 	}
 	
 	private ArrayList<Integer> getAllowedValues(Variable v1, Variable v2, int value) {
-	    ArrayList<BinaryTuple> constraints = csp.getArcConstraints(v1, v2);
+	    ArrayList<BinaryTuple> constraints1 = csp.getArcConstraints(v1, v2);
+	    ArrayList<BinaryTuple> constraints2 = csp.getArcConstraints(v2, v1);
 	    ArrayList<Integer> allowedValues = new ArrayList<>();
 	   
-	    if (constraints == null) {
+	    if (constraints1 == null && constraints2 == null) {
 	        return null;
 	    }
-	    if (constraints.isEmpty()) {
+	    if (constraints1 != null && constraints1.isEmpty() 
+	            && constraints2 != null && constraints2.isEmpty()) {
 	        return new ArrayList<>();
-	        //return null; //TODO refactor without using null to represent no constraints
 	    }
 	    
 	    /* Add to list of allowed values if first value matches given value */
-	    for (BinaryTuple bt : constraints) {
-	        if (bt.getVal1() == value) {
-	            allowedValues.add(bt.getVal2());
-	        }
+	    if (constraints1 != null) {
+            for (BinaryTuple bt : constraints1) {
+                if (bt.getVal1() == value) {
+                    allowedValues.add(bt.getVal2());
+                }
+            }
+	    }
+	    
+	    if (constraints2 != null) {
+            for (BinaryTuple bt : constraints2) {
+                if (bt.getVal2() == value) {
+                    allowedValues.add(bt.getVal1());
+                }
+            }
 	    }
 	    
 	    return allowedValues;
 	}
 	
 	public void undoPruning(Variable var) {
-	    for (int i : this.droppedVals) {
-	        var.restoreValue(i);
-	    }
-	    droppedVals.clear();
-	   
 	    undoMap.get(var).undo();
 	}
 	
