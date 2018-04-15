@@ -35,10 +35,9 @@ public class Experiment {
         randomHeuristics.add(new RandomVariableHeuristic());
         randomHeuristics.add(new RandomValueHeuristic());
         
-        Experiment ex = new Experiment("queens", "queens.csv", true, heuristics, randomHeuristics);
+        Experiment ex = new Experiment("queens", "queens2.csv", true, heuristics, randomHeuristics);
         ex.run(50);
         ex.writeResults();
-        
     }
    
     private BinaryCSPReader reader;
