@@ -40,9 +40,9 @@ public class BinaryCSPSolver {
 		
 		timeTaken = timeAfter - timeBefore;
 
-		for (Solution s : solutions) {
-		    System.out.println(s);
-		}
+//		for (Solution s : solutions) {
+//		    System.out.println(s);
+//		}
 //		Logger.displayMessage = true;
 		Logger.newline();
 		Logger.log(Logger.MessageType.INFO, "Problem=" + csp.getName());

@@ -1,24 +1,20 @@
-package csp.heuristic.impl;
+package csp.heuristic.impl.value;
 
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.TreeSet;
 
-import csp.Variable;
 import csp.heuristic.Heuristic;
 
-public class RandomHeuristic extends Heuristic {
+/**
+ * Heuristic that chooses a random value from the domain but chooses the first variable.
+ *
+ */
+public class RandomValueHeuristic extends Heuristic {
 
     private Random random;
     
-    public RandomHeuristic() {
+    public RandomValueHeuristic() {
         this.random = new Random();
-    }
-    
-    @Override
-    public Variable getNextVariable(ArrayList<Variable> variables) {
-        int index = random.nextInt(variables.size());
-        return variables.get(index);
     }
 
     @Override
@@ -32,13 +28,12 @@ public class RandomHeuristic extends Heuristic {
         }
         
         /* Should never reach here */
-        System.out.println("Domain first");
-        return domain.first();
+        return super.getNextValue(domain);
     }
-    
+
     @Override
     public String toString() {
-        return "Random";
+        return "Random value";
     }
 
 }

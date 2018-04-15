@@ -5,10 +5,10 @@ import java.util.* ;
 import csp.BinaryCSP;
 import csp.BinaryConstraint;
 import csp.BinaryTuple;
-import csp.heuristic.impl.LargestValueFirst;
 import csp.heuristic.impl.NoHeuristic;
 import csp.heuristic.impl.RandomHeuristic;
-import csp.heuristic.impl.SmallestDomainFirst;
+import csp.heuristic.impl.value.LargestValueFirst;
+import csp.heuristic.impl.variable.SmallestDomainFirst;
 import solver.BinaryCSPSolver;
 
 /**

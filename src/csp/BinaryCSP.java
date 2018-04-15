@@ -3,7 +3,7 @@ import java.util.* ;
 
 import csp.heuristic.Heuristic;
 import csp.heuristic.impl.NoHeuristic;
-import csp.heuristic.impl.SmallestDomainFirst;
+import csp.heuristic.impl.variable.SmallestDomainFirst;
 
 public final class BinaryCSP {
     

@@ -1,17 +1,11 @@
-package csp.heuristic.impl;
+package csp.heuristic.impl.value;
 
-import java.util.ArrayList;
 import java.util.TreeSet;
 
-import csp.Variable;
-import csp.heuristic.Heuristic;
+import csp.heuristic.impl.variable.SmallestDomainFirst;
 
 public class LargestValueFirst extends SmallestDomainFirst {
 
-    @Override
-    public Variable getNextVariable(ArrayList<Variable> variables) {
-        return super.getNextVariable(variables);
-    }
 
     @Override
     public int getNextValue(TreeSet<Integer> domain) {

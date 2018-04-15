@@ -16,10 +16,10 @@ import csp.BinaryCSP;
 import csp.Solution;
 import csp.Variable;
 import csp.heuristic.Heuristic;
-import csp.heuristic.impl.LargestValueFirst;
 import csp.heuristic.impl.NoHeuristic;
 import csp.heuristic.impl.RandomHeuristic;
-import csp.heuristic.impl.SmallestDomainFirst;
+import csp.heuristic.impl.value.LargestValueFirst;
+import csp.heuristic.impl.variable.SmallestDomainFirst;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 

@@ -7,10 +7,12 @@ import java.util.Map.Entry;
 import csp.BinaryCSP;
 import csp.BinaryConstraint;
 import csp.heuristic.Heuristic;
-import csp.heuristic.impl.LargestValueFirst;
 import csp.heuristic.impl.NoHeuristic;
 import csp.heuristic.impl.RandomHeuristic;
-import csp.heuristic.impl.SmallestDomainFirst;
+import csp.heuristic.impl.value.LargestValueFirst;
+import csp.heuristic.impl.value.RandomValueHeuristic;
+import csp.heuristic.impl.variable.RandomVariableHeuristic;
+import csp.heuristic.impl.variable.SmallestDomainFirst;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 import util.CSVWriter;
@@ -26,11 +28,15 @@ public class Experiment {
         ArrayList<Heuristic> heuristics = new ArrayList<>();
         heuristics.add(new NoHeuristic());
         heuristics.add(new SmallestDomainFirst());
-        heuristics.add(new RandomHeuristic());
         heuristics.add(new LargestValueFirst());
         
-        Experiment ex = new Experiment("queens", "queens.csv", true, heuristics);
-        ex.run(15, 100);
+        ArrayList<Heuristic> randomHeuristics = new ArrayList<>();
+        randomHeuristics.add(new RandomHeuristic());
+        randomHeuristics.add(new RandomVariableHeuristic());
+        randomHeuristics.add(new RandomValueHeuristic());
+        
+        Experiment ex = new Experiment("queens", "queens.csv", true, heuristics, randomHeuristics);
+        ex.run(50);
         ex.writeResults();
         
     }
@@ -42,9 +48,11 @@ public class Experiment {
     private String problemName;
     private ArrayList<Result> results;
     private ArrayList<Heuristic> heuristics;
+    private ArrayList<Heuristic> randomHeuristics;
     private ArrayList<String> instances;
     
-    public Experiment(String problemName, String outputFile, boolean allSolutions, ArrayList<Heuristic> heuristics) {
+    public Experiment(String problemName, String outputFile, boolean allSolutions, 
+            ArrayList<Heuristic> heuristics, ArrayList<Heuristic> randomHeuristics) {
         this.writer = new CSVWriter(outputFile);
         this.reader = new BinaryCSPReader();
         this.solver = new BinaryCSPSolver(allSolutions);
@@ -53,21 +61,21 @@ public class Experiment {
         
         this.problemName = problemName;
         this.heuristics = heuristics;
+        this.randomHeuristics = randomHeuristics;
         this.instances = Experiment.getCSPFiles(problemName);
     }
     
-    public void run(int warmups, int runs) {
+    public void run(int runs) {
         for (String instanceName : instances) {
             System.out.println("Run instance " + instanceName);
             BinaryCSP csp = reader.readBinaryCSP(BinaryCSPReader.CSP_PATH + problemName + "/" + instanceName);
            
             for (Heuristic heuristic : heuristics) {
-                System.out.println("Run heuristic: " + heuristic.toString());
-                csp.setHeuristic(heuristic);
-                
-                runWarmups(csp, warmups);
-                Result result = runExperiments(csp, runs);
-                results.add(result);
+                results.add(runExperiments(csp, heuristic, 1));
+            }
+            
+            for (Heuristic randomHeuristic : randomHeuristics) {
+                results.add(runExperiments(csp, randomHeuristic, runs));
             }
             
         }
@@ -86,14 +94,10 @@ public class Experiment {
         writer.close();
     }
     
-    private void runWarmups(BinaryCSP csp, int runs) {
-        for (int i = 0; i < runs; i++) {
-            System.out.println("Run warmup iteration " + i);
-            solver.solveCSP(csp);
-        }
-    }
-    
-    private Result runExperiments(BinaryCSP csp, int runs) {
+    private Result runExperiments(BinaryCSP csp, Heuristic heuristic, int runs) {
+        System.out.println("Run heuristic: " + heuristic.toString());
+        csp.setHeuristic(heuristic);
+        
         double totalTimeTaken = 0.0;
         int totalNodes = 0;
         int totalRevisions = 0;

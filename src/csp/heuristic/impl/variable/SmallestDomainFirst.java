@@ -1,4 +1,4 @@
-package csp.heuristic.impl;
+package csp.heuristic.impl.variable;
 
 import java.util.ArrayList;
 import java.util.TreeSet;
@@ -6,8 +6,9 @@ import java.util.TreeSet;
 import csp.Variable;
 import csp.heuristic.Heuristic;
 
-public class SmallestDomainFirst implements Heuristic {
+public class SmallestDomainFirst extends Heuristic {
 
+    @Override
     public Variable getNextVariable(ArrayList<Variable> variables) {
         Variable smallestDomain = variables.get(0);
         for (Variable v : variables) {
@@ -16,10 +17,6 @@ public class SmallestDomainFirst implements Heuristic {
             }
         }
         return smallestDomain;
-    }
-
-    public int getNextValue(TreeSet<Integer> domain) {
-        return domain.first();
     }
     
     public String toString() {
