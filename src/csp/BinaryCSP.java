@@ -2,8 +2,8 @@ package csp;
 import java.util.* ;
 
 import csp.heuristic.Heuristic;
-import csp.heuristic.impl.NoHeuristic;
-import csp.heuristic.impl.variable.SmallestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
+import csp.heuristic.impl.fixed.AscendingStatic;
 
 public final class BinaryCSP {
     
@@ -30,9 +30,11 @@ public final class BinaryCSP {
         for (BinaryConstraint bc : constraints) {
 
             /* Constraints can go both directions */
-            if (bc.getFirstVar() == v1.getId() && bc.getSecondVar() == v2.getId()
-                || bc.getFirstVar() == v2.getId() && bc.getSecondVar() == v1.getId()) {
+            if (bc.getFirstVar() == v1.getId() && bc.getSecondVar() == v2.getId()) {
                 return bc.getTuples();
+            }
+            if (bc.getFirstVar() == v2.getId() && bc.getSecondVar() == v1.getId()) {
+                return bc.getTuplesReverse();
             }
         }
        

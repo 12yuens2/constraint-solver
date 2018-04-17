@@ -40,16 +40,18 @@ public class BinaryCSPSolver {
 		
 		timeTaken = timeAfter - timeBefore;
 
-//		for (Solution s : solutions) {
-//		    System.out.println(s);
-//		}
-//		Logger.displayMessage = true;
+		for (Solution s : solutions) {
+		    System.out.println(s);
+		}
+		Logger.displayMessage = true;
 		Logger.newline();
 		Logger.log(Logger.MessageType.INFO, "Problem=" + csp.getName());
+		Logger.log(Logger.MessageType.INFO, "Heuristic=" + csp.getHeuristic());
 		Logger.log(Logger.MessageType.INFO, "Time taken=" + timeTaken);
 		Logger.log(Logger.MessageType.INFO, "Search nodes=" + nodes);
 		Logger.log(Logger.MessageType.INFO, "Revisions=" + revisions);
 		Logger.log(Logger.MessageType.INFO, "Solutions=" + solutions.size());
+		Logger.displayMessage = false;
 		return solutions;
 	}
 	
@@ -87,8 +89,8 @@ public class BinaryCSPSolver {
 	    
 	    else {
             /* New search node */
-            nodes++;
             
+            nodes++;
             Variable var = csp.selectVar(variables);
             int val = csp.selectVal(var); 
             branchLeft(variables, var, val);
@@ -146,19 +148,10 @@ public class BinaryCSPSolver {
 	        for (int val : var.getDomain()) {
 	            if (!reviseConstraint(futureVar, var, val)) {
 	                toDrop.add(val);
-//	                return false;
 	            }
 	        }
-	        
-//	        return !futureVar.getDomain().isEmpty();
-//	        for (int i : toDrop) {
-//	            var.deleteValue(i);
-//	            undoMap.get(var).trackValue(var, i);
-//	        }
-	        
 	        undoPruning(var);
-//	        undoPruning(futureVar);
-	        return !var.getDomain().isEmpty();
+	       	return !var.getDomain().isEmpty();
 	    }
 	    // revise arc by removing values from variable domains
 	    // prune domain of futureVar
@@ -210,14 +203,14 @@ public class BinaryCSPSolver {
 	
 	private ArrayList<Integer> getAllowedValues(Variable v1, Variable v2, int value) {
 	    ArrayList<BinaryTuple> constraints1 = csp.getArcConstraints(v1, v2);
-	    ArrayList<BinaryTuple> constraints2 = csp.getArcConstraints(v2, v1);
+//	    ArrayList<BinaryTuple> constraints2 = csp.getArcConstraints(v2, v1);
 	    ArrayList<Integer> allowedValues = new ArrayList<>();
 	   
-	    if (constraints1 == null && constraints2 == null) {
+	    if (constraints1 == null /*&& constraints2 == null*/) {
 	        return null;
 	    }
-	    if (constraints1 != null && constraints1.isEmpty() 
-	            && constraints2 != null && constraints2.isEmpty()) {
+	    if (constraints1 != null && constraints1.isEmpty()) {
+//	            && constraints2 != null && constraints2.isEmpty()) {
 	        return new ArrayList<>();
 	    }
 	    
@@ -229,14 +222,14 @@ public class BinaryCSPSolver {
                 }
             }
 	    }
-	    
-	    if (constraints2 != null) {
-            for (BinaryTuple bt : constraints2) {
-                if (bt.getVal2() == value) {
-                    allowedValues.add(bt.getVal1());
-                }
-            }
-	    }
+//	    
+//	    if (constraints2 != null) {
+//            for (BinaryTuple bt : constraints2) {
+//                if (bt.getVal2() == value) {
+//                    allowedValues.add(bt.getVal1());
+//                }
+//            }
+//	    }
 	    
 	    return allowedValues;
 	}

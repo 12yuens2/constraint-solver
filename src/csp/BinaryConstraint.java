@@ -4,11 +4,17 @@ import java.util.* ;
 public final class BinaryConstraint {
     private int firstVar, secondVar ;
     private ArrayList<BinaryTuple> tuples ;
+    private ArrayList<BinaryTuple> tuplesReversed;
   
     public BinaryConstraint(int fv, int sv, ArrayList<BinaryTuple> t) {
         firstVar = fv;
         secondVar = sv;
         tuples = t;
+        
+        tuplesReversed = new ArrayList<>();
+        for (BinaryTuple bt : tuples) {
+            tuplesReversed.add(new BinaryTuple(bt.getVal2(), bt.getVal1()));
+        }
     }
   
     public String toString() {
@@ -32,6 +38,10 @@ public final class BinaryConstraint {
 
     public ArrayList<BinaryTuple> getTuples() {
         return tuples;
+    }
+    
+    public ArrayList<BinaryTuple> getTuplesReverse() {
+        return tuplesReversed;
     }
     
     
