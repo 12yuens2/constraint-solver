@@ -18,7 +18,7 @@
 
 
 \section{Introduction}
-In this practical, a forward checking constraint solver with 2-way branching is implemented. The implementation provides an interface to allow different heuristics for variable and value selection. To test the solver works as intended, problem instances of the N-queens, langfords and sudoku problems were generated and solutions created. Further, the performance of the solver and different heuristics are tested empirically using various metrics.
+In this practical, a forward checking constraint solver with 2-way branching is implemented. The implementation provides an interface to allow different heuristics for variable and value selection. To test the solver works as intended, problem instances of the N-queens, langfords and sudoku problems were generated and solutions created. Further, tests were written to ensure the right number of solutions were found for problem instances, for example exactly 724 solutions to the 10-queens problem. Finally, the performance of the solver and different heuristics are tested empirically using various metrics to explore and understand their differences. 
 
 \section{Design and Implementation}
 Many of the algorithms presented in this section were taken and adapted from the lecture slides to provide a complete method of what was done and any changes made during the implementation when compared to the original algorithm. 
@@ -41,9 +41,9 @@ The 2 way forward checking algorithm was implemented from the following algorith
 \end{algorithmic}
 \caption{2-way forward checking algorithm, adapted from lecture slides by Ian Miguel.}
 \end{algorithm}
-The small change in the algorithm is not to exit when the first solution is found, but to add that solution to a list and continue to find more solutions. This was done to allow all solutions could be found. 
+The small change made to the algorithm was to not exit when the first solution was found, but to add that solution to a list and continue to find more solutions. This was done to allow all solutions to be found as a means of testing the solver is working properly.
 % A boolean variable was also added to stop the solver on the first solution found if needed. This was important to be able to experiment on the differences between finding one solution and finding all solutions, especially for larger constraint problems. 
-To check for \texttt{completeAssignment()}, all variables in the problem instance contain a boolean to indicate that they have been assigned. \texttt{completeAssignment()} is true if all the variables are assigned. The variables can further be unassigned later by changing the assignment boolean in the corresponding variable.  
+To check for \texttt{completeAssignment()}, all variables in the problem instance contained a boolean to indicate that they have been assigned. \texttt{completeAssignment()} is true if all the variables are assigned. The variables can further be unassigned later by changing the assignment boolean in the corresponding variable.  
 \n
 The two methods \texttt{selectVar()} and \texttt{selectVal()} are implemented using heuristics which are explained below in section \ref{sec:heuristics}. Each heuristic implements its own variable and value selection functions which the solver uses, allowing the solver to be generic and extensible over any heuristic. Further, this means the heuristics do not have to worry about any other part of the solver, as the list of variables and domain of values are updated and kept track of in the solver to be passed to the heuristics. 
 \n
@@ -61,9 +61,9 @@ Next, we look into detail on the algorithms for left and right branching.
 \end{algorithmic}
 \caption{Branching left during forward checking.}
 \end{algorithm}
-When we branch left, the selected value is assigned to the selected variable and future arcs revised. The idea is to ensure that for any particular value assignment, the arcs are revised to ensure local arc consistency. If the arc is still consistent, then we explore further down the tree by recursively forward checking with the reduced list of variables. 
+When we branch left, the selected value is assigned to the selected variable and future arcs revised. The idea is to ensure that for any particular value assignment, the arcs are revised to ensure local arc consistency. If the arc is still consistent, then we explore further down the tree by recursively forward checking with the reduced list of variables.
 \n
-When the functions eventually return, any pruning done during arc revision must be undone for backtracking as the value assignment has not worked out. This is done with the \texttt{UndoTracker} class which keeps a map of each variable and the list of pruned values that need to be undone. Next, the solver contains a map variables to an \texttt{UndoTracker}. Whenever arcs are revised, the tracker for the variable chosen for revision is updated with the list of other future variables and their pruned values. This works because every time the algorithm goes down the left branch, a new variable is selected to be assigned and its arc revised. So when coming back up the tree, each depth corresponds directly to the variable which acts as the key to an \texttt{UndoTracker}. 
+When the functions eventually return or if the arc is inconsistent, the current value assignment does not lead to a solution, so any pruning done during arc revision must be undone for backtracking as the value assignment has not worked out. This is done with the \texttt{UndoTracker} class which keeps a map of each variable and the list of pruned values that need to be undone. Next, the solver contains a map of each variable to an \texttt{UndoTracker}. Whenever arcs are revised, the tracker for the variable chosen for revision is updated with the list of other future variables and their pruned values. This works to prune only values from each step of the recursion, because every time the algorithm goes down the left branch, a new variable is selected to be assigned and its arc revised. So when coming back up the tree, each depth corresponds directly to the selected variable, which acts as the key to an \texttt{UndoTracker}. 
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -80,7 +80,9 @@ When the functions eventually return, any pruning done during arc revision must 
 \end{algorithmic}
 \caption{Branching right during forward checking.}
 \end{algorithm}
-As this is a 2-way branching scheme, the right branch is the branch where the given value assigned on the left branch is now removed.
+As this is a 2-way branching scheme, the right branch is the branch where the given value assigned on the left branch is now removed. This removed value in \texttt{deleteVal()} does not have to be stored or kept track of as the same value is passed to the \texttt{restoreVal()} method later in the same function scope. Future arcs are revised again before any further forward checking and of course the pruning is undone afterwards as well.
+\n
+Finally are the algorithms for revising arcs. The algorithm for \texttt{reviseFutureArcs()} is not shown, as it remains unchanged. For all variables passed into it, the arc between the currently assigned variable and the list of future variables is revised and if the local arc consistency is broken at any stage, the function returns false. The method for which each arc is revised is detailed as follows:
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -102,8 +104,17 @@ As this is a 2-way branching scheme, the right branch is the branch where the gi
 \end{algorithmic}
 \caption{Algorithm for revising an arc.}
 \end{algorithm}
-
-There is a distinction between no arc existing between two variables and no constraints in an arc between two variables. An example of the first case is common in Sudoku problems, where two cells that don't share the same row, column or grid do not have an arc between them as they do not affect each other. An example of the latter case is in the 2-queens problem, where there are no constraints specified between the first and second row, because there are no valid values for either. 
+There were a few difficulties encountered during the implementation of the revision step. First, because of the way the assigned values are implemented in any given variable, if a variable has been assigned, \texttt{revise()} only uses the assigned value to revise the arcs to all other variables. This means to deal with revision during right branching, the revision function has to be altered to revise for each value in the variable's domain. A more streamlined way to handle this would have been to represent assigning a value by only leaving the assigned value in the domain of the chosen variable. That way the same code can be reused for both left and right branching, as both options loop through all values in the variable's domain. The second issue was an issue with the way the \texttt{.csp} constraint problems were written and parsed. In the \texttt{.csp} format, an arc is specified both ways under one \texttt{BinaryConstraint} which contains both variables. 
+\begin{lstlisting}[caption={Example of how constraints are specified in \texttt{.csp}}]
+c(0, 1)
+1, 3
+2, 4
+3, 5
+4, 6
+\end{lstlisting}
+In the above listing, the tuples in constraint \texttt{c(0, 1)} applies both ways and have to be matched accordingly, rather than simply being the arc in the direction arc($v_0$, $v_1$). For example if the selected variable was $v_1$, the second value of the tuples have to be used rather than the first. The change needed to implement this was to keep a copy of the tuples reversed so that when matching to the constraint, the reversed tuples can be returned if that order is needed (i.e, checking the arc($v_1$, $v_0$) rather than the arc ($v_0$, $v_1$). 
+\n
+Furthermore, there is a distinction between no arc existing between two variables and no constraints in an arc between two variables. An example of the first case is common in Sudoku problems, where two cells that don't share the same row, column or grid do not have an arc between them as they do not affect each other. An example of the latter case is in the 2-queens problem, where there are no constraints specified between the first and second row, because there are no valid values for either. This was a case that had to be handled carefully, as the arcs are still consistent if no arc exists between two variables, but the arc not consistent if there are no valid values for the arc, as in the 2-queens problem. 
 
 \subsection{Heuristics}\label{sec:heuristics}
 The heuristics used for the solver are implemented as an abstract class to allow any additional heuristic to be easily implemented. The class exposes three functions for any subclass implementations:
@@ -116,28 +127,44 @@ The first two allow any implementation of a heuristic to choose the next variabl
 \n
 The \texttt{toString()} method simply gives a name for the heuristics to easily identify them for data gathering reasons. 
 
-\subsubsection{Static heuristics}
+\subsubsection{Static variable heuristics}
+A few simple static variable ordering heuristics were used:
+\begin{itemize}
+\item \textbf{Ascending order} - The static ascending order heuristic is the default heuristic which always chooses the first element in the list of variables. 
+\item \textbf{Descending order} - Order of the variables are chosen in descending order. For example if there were 3 variables $v_{1}, v_{2}, v_{3}$ the order for choosing variables becomes $v_{3}, v_{2}, v_{1}$. 
+\item \textbf{Odd/even order} - All odd numbered variables are chosen first, then even numbered variables. The variables are further chosen in ascending order. For example, given 5 variables $v_{1}, v_2, v_3, v_4, v_5$, the chosen order becomes $v_1, v_3, v_5, v_2, v_4$. 
+\item \textbf{Maximum degree} - Choose variables which are the most constrained first, as they are likely to be the hardest choices. This was done by calculating the total number of possible value combinations between each pair of variables minus the number of tuples between the pair from the CSP description. This gives the total number of constraints for one variable to all other variables. The variables are sorted and chosen by highest number of constraints first. 
+\item \textbf{Minimum degree} - Simply the opposite of maximum degree, where the variables with the \textit{least} number of edges in the primal graph are chosen first. This heuristic was implemented to show that the opposite behaviour of maximum degree performs more poorly.
+\end{itemize}
+For all these variable heuristics, the values from the domains are chosen in ascending order as the domain is stored as a sorted set, so the first value chosen is the lowest one. 
 
 \subsubsection{Dynamic heuristics}
-A small number of dynamic heuristics were implemented to test the difference between them, especially if their effectiveness changes based on the size of the problem instance. 
+The only dynamic heuristics implemented was smallest domain first and its inverse (largest domain first). These were done by checking the domain of each variable in the list of variables and choosing the one with the smallest or largest number of domain values. 
 
-\subsection{Maintain arc consistency (MAC)}
+\subsubsection{Random heuristics}
+Random heuristics were implemented for empirical testing to see how they would perform if a random variable or value assignment was chosen on every step. The three different random heuristics (\texttt{Random}, \texttt{RandomVariable} and \texttt{RandomValue}) also allow us to see the difference between variable and value heuristics. \texttt{Random} randomly chooses both variable and value, while \texttt{RandomVariable} and \texttt{RandomValue} only choose the variable and value respectively as their name implies. The random nature of these heuristics combined with many iterations should be able to show any differences between choosing the variable and value, showing if one may impact performance more than another. There is also a fourth \texttt{RandomStatic} heuristic, which statically chooses the random order at the beginning rather than choosing randomly every step. This is subtly different from a dynamic random order because each left subtree that is explored will stay in the same random order, whereas choosing randomly dynamically will change every subtree to be different and random. 
+
+\subsubsection{Value heuristics}
+The idea of using value heuristics seems very problem dependent. For certain problems, the value of the variable may matter, but it may not matter for others. As such TODO
+
 
 \section{Experimental methodology}
 
 \subsection{Testing}
 To make sure that the constraint solver worked as intended, JUnit tests were written. Because the constraints problems and solutions can be very large, it was not feasible to write tests that checked the correctness of all solutions. However, smaller problems such as the 4Queens problem could be tested. Furthermore, the solver can be specified to output all solutions in which case the number of solutions (including all symmetrical solutions) can be tested to ensure the correct number of solutions were found. 
+\n
+Further, tests were written for each heuristic to make sure each heuristic was not doing anything wrong that changed how the solver worked. 
 
 \subsection{Metrics used}
 
-Multiple metrics were used to empirically measure the performance of different heuristics
+Multiple metrics were used to empirically measure the performance of different heuristics. Time, number of solver nodes and number of arc revisions were all used as metrics. The number of solver nodes was calculated as the number of times \texttt{forwardChecking()} was called and did not return immediately as it represents a step down into the recursion and search tree. The number of arc revisions was calculated each time a constraint between two variables was revised. For example, if there are two variables and two and three values in their domains respectively, the number of arc revisions between one variable to another is 6. Finally the time taken only takes into account the time the solver took to solve the problem and find all solutions rather than the total time of the whole process. 
 
 \subsection{Experiments}
 Multiple runs of the experiments were done to ensure reliable results for using the random heuristics. The number of search nodes and revisions do not normally require multiple iterations because they are deterministic, so every run would lead to the same resulting number of arc revisions and solver nodes. However a ``random" heuristic that randomly chooses the next variable to assign would require the extra runs to determine an average number of nodes and arc revisions.
 \n
-The time taken was also measured during the experiments for completeness, but it is not used as a metric in the reported results. This is because of time benchmarking issues in Java due to the JVM \cite{jvm-benchmark} cause the time taken to be unreliable without a robust benchmarking framework. 
+The time taken was also measured during the experiments for completeness. Due to time benchmarking issues in Java due to the JVM \cite{jvm-benchmark}, the time taken is not unreliable without a robust benchmarking framework. 
 \n
-To run the experiments, an \texttt{Experiment} class was developed that could take a list of heuristics and constraint problems and run the solver, returning a \texttt{Result} object which contained the time taken, number of solver nodes and number of arc revisions. 
+To run the experiments, an \texttt{Experiment} class was developed that could take a list of heuristics, number of runs and constraint problems and run the solver, returning a \texttt{Result} object which contained the time taken, number of solver nodes and number of arc revisions averaged over all the runs. 
 
 \section{Results and analysis}
 
@@ -146,7 +173,7 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 % #3 - y axis data
 % #4 - csv file
 \newcommand{\cspplot}[4]{
-\begin{tikzpicture}
+\begin{tikzpicture}[scale=0.55]
 \begin{axis}[
 	title = {\textbf{#1}},
 	legend pos=south east,
@@ -168,6 +195,12 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \addlegendentry{No heuristic}
 
 \addplot+[only marks, fill opacity=0.2,
+		discard if not={Heuristic}{Maximum Degree},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Maximum Degree}
+
+\addplot+[only marks, fill opacity=0.2,
 		discard if not={Heuristic}{Random},
 %		discard if larger={Instance}{6}
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
@@ -175,6 +208,38 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 
 \end{axis}
 \end{tikzpicture}
+}
+
+\newcommand{\sixplot}[2]{
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.31\textwidth}
+\cspplot{#1 instances against solver nodes}{Instance}{SolverNodes}{#2}
+\end{minipage}
+%
+\begin{minipage}{0.31\textwidth}
+\cspplot{#1 instances against arc revisions}{Instance}{ArcRevisions}{#2}
+\end{minipage}
+%
+\begin{minipage}{0.31\textwidth}
+\cspplot{#1 instances against time taken}{Instance}{SolverTime}{#2}
+\end{minipage}
+
+\hspace{0.5cm}
+
+\begin{minipage}{0.31\textwidth}
+\cspplot{#1 solver time against solver nodes}{SolverTime}{SolverNodes}{#2}
+\end{minipage}
+%
+\begin{minipage}{0.31\textwidth}
+\cspplot{#1 solver time against arc revisions}{SolverTime}{ArcRevisions}{#2}
+\end{minipage}
+%
+\begin{minipage}{0.31\textwidth}
+\cspplot{#1 solver nodes against arc revisions}{SolverNodes}{ArcRevisions}{#2}
+\end{minipage}
+\caption{#1 problem performance with different metrics}
+\end{figure}
 }
 
 \newcommand{\randomplot}[4] {
@@ -186,6 +251,11 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 	xlabel={#2},
 	ylabel={#3}
 ]
+
+\addplot+[only marks, fill opacity=0.2,
+		discard if not={Heuristic}{Random static},
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Random static}
 
 \addplot+[only marks, fill opacity=0.2,
 		discard if not={Heuristic}{Random variable},
@@ -209,11 +279,65 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \end{tikzpicture}
 }
 
+\newcommand{\barplot}[4]{
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{#1}},
+	bar width=0.3cm,
+	ybar,
+	legend pos=south east,
+	enlarge x limits=0.4,
+	ymode=log,
+	xlabel={#2},
+	xtick={23,24},
+	xticklabels={langfords2-3, langfords2-4},
+	legend pos=outer north east,
+	ylabel={#3}
+]
+
+\addplot+[fill opacity=0.2,
+		discard if not={Heuristic}{Random static},
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Random static}
+
+\addplot+[fill opacity=0.2,
+		discard if not={Heuristic}{Random variable},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Random variable}
+
+\addplot+[fill opacity=0.2,
+		discard if not={Heuristic}{Random value},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Random value}
+
+\addplot+[fill opacity=0.2,
+		discard if not={Heuristic}{Random},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Random}
+
+\end{axis}
+\end{tikzpicture}
+}
+
+
+
+
+
 \begin{figure}[H]
 \centering
-\cspplot{N queens problem}{Instance}{SolverNodes}{queens2.csv}
-\caption{}
+\sixplot{N queens}{queens2.csv}
+\caption{N queens problem performance with different metrics and heuristics.}
 \end{figure}
+
+\begin{figure}[H]
+\centering
+\barplot{Langfords}{Instance}{SolverNodes}{langfords.csv}
+\caption{Langfords problem with different metrics and heuristics.}
+\end{figure}
+
 
 
 \begin{figure}[H]
