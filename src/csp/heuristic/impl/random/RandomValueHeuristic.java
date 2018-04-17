@@ -1,4 +1,4 @@
-package csp.heuristic.impl.value;
+package csp.heuristic.impl.random;
 
 import java.util.Random;
 import java.util.TreeSet;

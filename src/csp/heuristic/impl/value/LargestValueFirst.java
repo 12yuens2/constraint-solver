@@ -2,7 +2,7 @@ package csp.heuristic.impl.value;
 
 import java.util.TreeSet;
 
-import csp.heuristic.impl.variable.SmallestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
 
 public class LargestValueFirst extends SmallestDomainFirst {
 

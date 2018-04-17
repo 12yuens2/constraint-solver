@@ -1,4 +1,4 @@
-package csp.heuristic.impl.variable;
+package csp.heuristic.impl.random;
 
 import java.util.ArrayList;
 import java.util.Random;
