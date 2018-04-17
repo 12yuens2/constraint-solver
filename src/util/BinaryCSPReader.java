@@ -5,10 +5,15 @@ import java.util.* ;
 import csp.BinaryCSP;
 import csp.BinaryConstraint;
 import csp.BinaryTuple;
-import csp.heuristic.impl.NoHeuristic;
-import csp.heuristic.impl.RandomHeuristic;
+import csp.heuristic.impl.dynamic.LargestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
+import csp.heuristic.impl.fixed.AscendingStatic;
+import csp.heuristic.impl.fixed.DescendingStatic;
+import csp.heuristic.impl.fixed.MaximumDegree;
+import csp.heuristic.impl.fixed.OddEvenHeuristic;
+import csp.heuristic.impl.random.RandomHeuristic;
+import csp.heuristic.impl.random.RandomStatic;
 import csp.heuristic.impl.value.LargestValueFirst;
-import csp.heuristic.impl.variable.SmallestDomainFirst;
 import solver.BinaryCSPSolver;
 
 /**
@@ -32,7 +37,7 @@ public final class BinaryCSPReader {
     }
     BinaryCSPReader reader = new BinaryCSPReader() ;
 	BinaryCSP csp = reader.readBinaryCSP(args[0]);
-	csp.setHeuristic(new SmallestDomainFirst());
+	csp.setHeuristic(new AscendingStatic());
 	System.out.println(csp);
 	System.out.println(csp.getHeuristic());
 	

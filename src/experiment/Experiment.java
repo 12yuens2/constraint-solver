@@ -7,12 +7,18 @@ import java.util.Map.Entry;
 import csp.BinaryCSP;
 import csp.BinaryConstraint;
 import csp.heuristic.Heuristic;
-import csp.heuristic.impl.NoHeuristic;
-import csp.heuristic.impl.RandomHeuristic;
+import csp.heuristic.impl.dynamic.LargestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
+import csp.heuristic.impl.fixed.AscendingStatic;
+import csp.heuristic.impl.fixed.DescendingStatic;
+import csp.heuristic.impl.fixed.MaximumDegree;
+import csp.heuristic.impl.fixed.MinimumDegree;
+import csp.heuristic.impl.fixed.OddEvenHeuristic;
+import csp.heuristic.impl.random.RandomHeuristic;
+import csp.heuristic.impl.random.RandomStatic;
+import csp.heuristic.impl.random.RandomValueHeuristic;
+import csp.heuristic.impl.random.RandomVariableHeuristic;
 import csp.heuristic.impl.value.LargestValueFirst;
-import csp.heuristic.impl.value.RandomValueHeuristic;
-import csp.heuristic.impl.variable.RandomVariableHeuristic;
-import csp.heuristic.impl.variable.SmallestDomainFirst;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 import util.CSVWriter;
@@ -26,8 +32,12 @@ public class Experiment {
     public static void main(String[] args) {
         
         ArrayList<Heuristic> heuristics = new ArrayList<>();
-        heuristics.add(new NoHeuristic());
+        heuristics.add(new AscendingStatic());
+        heuristics.add(new DescendingStatic());
         heuristics.add(new SmallestDomainFirst());
+        heuristics.add(new LargestDomainFirst());
+        heuristics.add(new OddEvenHeuristic());
+        
         heuristics.add(new LargestValueFirst());
         
         ArrayList<Heuristic> randomHeuristics = new ArrayList<>();
@@ -35,8 +45,8 @@ public class Experiment {
         randomHeuristics.add(new RandomVariableHeuristic());
         randomHeuristics.add(new RandomValueHeuristic());
         
-        Experiment ex = new Experiment("queens", "queens2.csv", true, heuristics, randomHeuristics);
-        ex.run(50);
+        Experiment ex = new Experiment("langfords", "langfords.csv", true, heuristics, randomHeuristics);
+        ex.run(200);
         ex.writeResults();
     }
    
@@ -69,9 +79,16 @@ public class Experiment {
             System.out.println("Run instance " + instanceName);
             BinaryCSP csp = reader.readBinaryCSP(BinaryCSPReader.CSP_PATH + problemName + "/" + instanceName);
            
+            /* Various heuristics */
             for (Heuristic heuristic : heuristics) {
-                results.add(runExperiments(csp, heuristic, 1));
+                results.add(runExperiments(csp, heuristic, runs));
             }
+            results.add(runExperiments(csp, new MaximumDegree(csp), runs));
+            results.add(runExperiments(csp, new MinimumDegree(csp), runs));
+            
+            
+            /* Random heuristics */
+            results.add(runExperimentRandomStatic(csp, runs));
             
             for (Heuristic randomHeuristic : randomHeuristics) {
                 results.add(runExperiments(csp, randomHeuristic, runs));
@@ -117,6 +134,34 @@ public class Experiment {
         int numSolutions = solver.getNumSolutions();
         
         return new Result(csp.getName().replaceAll("[^0-9]", ""), csp.getHeuristic().toString(), timeTaken, solverNodes, arcRevisions, numSolutions);
+    }
+    
+    private Result runExperimentRandomStatic(BinaryCSP csp, int runs) {
+        Heuristic heuristic = new RandomStatic(csp);
+        System.out.println("Run heuristic: " + heuristic.toString());
+        csp.setHeuristic(heuristic);
+        
+        double totalTimeTaken = 0.0;
+        int totalNodes = 0;
+        int totalRevisions = 0;
+        
+        for (int i = 0; i < runs; i++) {
+            System.out.println("Run experiment iteration " + i);
+            solver.solveCSP(csp);
+            
+            totalTimeTaken += solver.getTimeTaken() / 1000000.0;
+            totalNodes += solver.getNodes();
+            totalRevisions += solver.getRevisions();
+   
+        }   
+        
+        double timeTaken = totalTimeTaken / runs;
+        int solverNodes = totalNodes / runs;
+        int arcRevisions = totalRevisions / runs;
+        int numSolutions = solver.getNumSolutions();
+        
+        return new Result(csp.getName().replaceAll("[^0-9]", ""), csp.getHeuristic().toString(), timeTaken, solverNodes, arcRevisions, numSolutions);
+     
     }
     
     

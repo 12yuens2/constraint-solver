@@ -40,9 +40,9 @@ public class BinaryCSPSolver {
 		
 		timeTaken = timeAfter - timeBefore;
 
-		for (Solution s : solutions) {
-		    System.out.println(s);
-		}
+//		for (Solution s : solutions) {
+//		    System.out.println(s);
+//		}
 		Logger.displayMessage = true;
 		Logger.newline();
 		Logger.log(Logger.MessageType.INFO, "Problem=" + csp.getName());
@@ -78,7 +78,6 @@ public class BinaryCSPSolver {
 	    if (completeAssignment()) {
 	        Logger.log(Logger.MessageType.DEBUG, "Found solution.");
 	        solutions.add(new Solution(csp));
-	        
 	        return;
 	    }
 	    
@@ -194,7 +193,7 @@ public class BinaryCSPSolver {
 	    
 	    /* Domain wipeout */
 	    if (futureVar.getDomain().isEmpty()) {
-	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout from revision");
+	        Logger.log(Logger.MessageType.DEBUG, "Domain wipeout from rlangfordslangfordsevision");
 	        return false;
 	    }
         
@@ -203,14 +202,12 @@ public class BinaryCSPSolver {
 	
 	private ArrayList<Integer> getAllowedValues(Variable v1, Variable v2, int value) {
 	    ArrayList<BinaryTuple> constraints1 = csp.getArcConstraints(v1, v2);
-//	    ArrayList<BinaryTuple> constraints2 = csp.getArcConstraints(v2, v1);
 	    ArrayList<Integer> allowedValues = new ArrayList<>();
 	   
-	    if (constraints1 == null /*&& constraints2 == null*/) {
+	    if (constraints1 == null) {
 	        return null;
 	    }
 	    if (constraints1 != null && constraints1.isEmpty()) {
-//	            && constraints2 != null && constraints2.isEmpty()) {
 	        return new ArrayList<>();
 	    }
 	    
@@ -222,14 +219,6 @@ public class BinaryCSPSolver {
                 }
             }
 	    }
-//	    
-//	    if (constraints2 != null) {
-//            for (BinaryTuple bt : constraints2) {
-//                if (bt.getVal2() == value) {
-//                    allowedValues.add(bt.getVal1());
-//                }
-//            }
-//	    }
 	    
 	    return allowedValues;
 	}

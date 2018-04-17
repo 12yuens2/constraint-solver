@@ -14,9 +14,10 @@ import org.junit.runners.Parameterized.Parameters;
 
 import csp.BinaryCSP;
 import csp.Solution;
-import csp.heuristic.impl.NoHeuristic;
-import csp.heuristic.impl.RandomHeuristic;
-import csp.heuristic.impl.variable.SmallestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
+import csp.heuristic.impl.fixed.AscendingStatic;
+import csp.heuristic.impl.fixed.MaximumDegree;
+import csp.heuristic.impl.random.RandomHeuristic;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 
@@ -25,7 +26,7 @@ public class LangfordsTest {
     @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                {"2_3", 16}, {"2_4", 32}, {"2_5", 0}, {"2_6", 0}
+                {"2_3", 2}, {"2_4", 2}, {"2_5", 0}, {"2_6", 0}, {"3_9", 6}
            });
     }
     private static BinaryCSPReader reader = new BinaryCSPReader();
@@ -39,19 +40,15 @@ public class LangfordsTest {
         this.fExpected = expected;
     }
 
-    @Test
-    public void noHeuristicTest() {
-        BinaryCSP langfordsCSP = getCSP("csp/langfords/langfords" + fInput + ".csp");
-        
-        langfordsCSP.setHeuristic(new NoHeuristic());
-        
-        ArrayList<Solution> queensSolutions = solver.solveCSP(langfordsCSP);
-        if (fExpected == 0) {
-            assertEquals(fExpected, queensSolutions.size());
-        } else {
-            assertTrue(queensSolutions.size() >= fExpected);
-        }
-    }
+//    @Test
+//    public void noHeuristicTest() {
+//        BinaryCSP langfordsCSP = getCSP("csp/langfords/langfords" + fInput + ".csp");
+//        
+//        langfordsCSP.setHeuristic(new AscendingStatic());
+//        
+//        ArrayList<Solution> langfordsSolutions = solver.solveCSP(langfordsCSP);
+//        assertEquals(fExpected, langfordsSolutions.size());
+//    }
     
     @Test
     public void sdfHeuristicTest() {
@@ -59,30 +56,35 @@ public class LangfordsTest {
         
         langfordsCSP.setHeuristic(new SmallestDomainFirst());
         
-        ArrayList<Solution> queensSolutions = solver.solveCSP(langfordsCSP);
-        if (fExpected == 0) {
-            assertEquals(fExpected, queensSolutions.size());
-        } else {
-            assertTrue(queensSolutions.size() >= fExpected);
-        }
+        ArrayList<Solution> langfordsSolutions = solver.solveCSP(langfordsCSP);
+        assertEquals(fExpected, langfordsSolutions.size());
     }
     
+    
+//    @Test
+//    public void randomHeuristicTest() {
+//        BinaryCSP langfordsCSP = getCSP("csp/langfords/langfords" + fInput + ".csp");
+//        
+//        langfordsCSP.setHeuristic(new RandomHeuristic());
+//        
+//        ArrayList<Solution> langfordsSolutions = solver.solveCSP(langfordsCSP);
+//        if (fExpected == 0) {
+//            assertEquals(fExpected, langfordsSolutions.size());
+//        } else {
+//            assertTrue(langfordsSolutions.size() >= fExpected);
+//        }
+//    }
     
     @Test
-    public void randomHeuristicTest() {
+    public void MaximumDegreeTest() {
         BinaryCSP langfordsCSP = getCSP("csp/langfords/langfords" + fInput + ".csp");
         
-        langfordsCSP.setHeuristic(new RandomHeuristic());
+        langfordsCSP.setHeuristic(new MaximumDegree(langfordsCSP));
         
-        ArrayList<Solution> queensSolutions = solver.solveCSP(langfordsCSP);
-        if (fExpected == 0) {
-            assertEquals(fExpected, queensSolutions.size());
-        } else {
-            assertTrue(queensSolutions.size() >= fExpected);
-        }
-    }
-    
-    
+        ArrayList<Solution> langfordsSolutions = solver.solveCSP(langfordsCSP);
+        assertEquals(fExpected, langfordsSolutions.size());
+    }   
+     
     private static BinaryCSP getCSP(String filename) {
         return reader.readBinaryCSP(filename);
     } 

@@ -14,7 +14,7 @@ import org.junit.runners.Parameterized.Parameters;
 import csp.BinaryCSP;
 import csp.Solution;
 import csp.Variable;
-import csp.heuristic.impl.variable.SmallestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 

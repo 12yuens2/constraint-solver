@@ -16,10 +16,16 @@ import csp.BinaryCSP;
 import csp.Solution;
 import csp.Variable;
 import csp.heuristic.Heuristic;
-import csp.heuristic.impl.NoHeuristic;
-import csp.heuristic.impl.RandomHeuristic;
+import csp.heuristic.impl.dynamic.LargestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
+import csp.heuristic.impl.fixed.AscendingStatic;
+import csp.heuristic.impl.fixed.DescendingStatic;
+import csp.heuristic.impl.fixed.MaximumDegree;
+import csp.heuristic.impl.fixed.OddEvenHeuristic;
+import csp.heuristic.impl.random.RandomHeuristic;
+import csp.heuristic.impl.random.RandomValueHeuristic;
+import csp.heuristic.impl.random.RandomVariableHeuristic;
 import csp.heuristic.impl.value.LargestValueFirst;
-import csp.heuristic.impl.variable.SmallestDomainFirst;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 
@@ -52,8 +58,18 @@ public class NQueensTest {
     }
 
     @Test
-    public void noHeuristicTest() {
-        numSolutionsTest(new NoHeuristic());
+    public void ascendingTest() {
+        numSolutionsTest(new AscendingStatic());
+    }
+    
+    @Test
+    public void descendingTest() {
+        numSolutionsTest(new DescendingStatic());
+    }
+    
+    @Test
+    public void oddEvenTest() {
+        numSolutionsTest(new OddEvenHeuristic());
     }
     
     @Test
@@ -62,48 +78,40 @@ public class NQueensTest {
     }
     
     @Test
+    public void ldfHeuristicTest() {
+        numSolutionsTest(new LargestDomainFirst());
+    }
+    
+    
+    @Test
+    public void maximumDegreeTest() {
+        BinaryCSP queensCSP = getCSP("csp/queens/" + fInput + "Queens.csp");
+        
+        queensCSP.setHeuristic(new MaximumDegree(queensCSP));
+        
+        ArrayList<Solution> queensSolutions = solver.solveCSP(queensCSP);
+        assertEquals(fExpected, queensSolutions.size());
+    }
+    
+    
+    @Test
     public void randomHeuristicTest() {
         numSolutionsTest(new RandomHeuristic());
     }
     
     @Test
-    public void largestValueHeuristicTest() {
-        numSolutionsTest(new LargestValueFirst());
+    public void randomVariableTest() {
+        numSolutionsTest(new RandomVariableHeuristic());
     }
     
-//    @Test
-//    public void test4Queens() {
-//        BinaryCSP fourQueensCSP = getCSP("csp/4Queens.csp");
-//        ArrayList<Solution> fourQueensSolutions = solver.solveCSP(fourQueensCSP);
-//       
-//        /* First solution */
-//        Solution s1 = fourQueensSolutions.get(0);
-//        ArrayList<Variable> rows = getQueensRows(s1, 4);
-//        assertEquals(1, s1.getVarValue(rows.get(0)));
-//        assertEquals(3, s1.getVarValue(rows.get(1)));
-//        assertEquals(0, s1.getVarValue(rows.get(2)));
-//        assertEquals(2, s1.getVarValue(rows.get(3)));
-//        
-//        /* Second solution */
-//        Solution s2 = fourQueensSolutions.get(1);
-//        rows = getQueensRows(s1, 4);
-//        assertEquals(2, s2.getVarValue(rows.get(0)));
-//        assertEquals(0, s2.getVarValue(rows.get(1)));
-//        assertEquals(3, s2.getVarValue(rows.get(2)));
-//        assertEquals(1, s2.getVarValue(rows.get(3)));
-//    }
+    @Test
+    public void randomValueTest() {
+        numSolutionsTest(new RandomValueHeuristic());
+    }
+
     
     private static BinaryCSP getCSP(String filename) {
         return reader.readBinaryCSP(filename);
     }
-    
-    private static ArrayList<Variable> getQueensRows(Solution s, int problemSize) {
-        ArrayList<Variable> rows = new ArrayList<>();
-        
-        for (int i = 0; i < problemSize; i++) {
-            rows.add(s.getVariable(i));
-        }
-        
-        return rows;
-    }
+
 }
