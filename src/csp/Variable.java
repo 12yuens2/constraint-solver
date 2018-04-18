@@ -8,10 +8,8 @@ import util.SortedArrayList;
 
 public class Variable {
 
-	//private int domainLB;
-	//private int domainUB;
     private int id;
-	private TreeSet<Integer> domain; // make domain a sorted arraylist so LB and UB always at 0 and size() indices?
+	private TreeSet<Integer> domain; 
 
 	private boolean isAssigned;
 	private int assignedValue;
@@ -21,9 +19,9 @@ public class Variable {
 		this.id = id;
 		
 		this.domain = new TreeSet<>();
-		
-		//TODO dont need i
-		for (int i = 0, j = domainLB; j <= domainUB; i++, j++) {
+	
+		/* All values between lower and upper bound of domain is added here */
+		for (int j = domainLB; j <= domainUB; j++) {
 		    this.domain.add(j);
 		}
 		

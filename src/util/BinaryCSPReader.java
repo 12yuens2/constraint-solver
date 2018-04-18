@@ -13,7 +13,6 @@ import csp.heuristic.impl.fixed.MaximumDegree;
 import csp.heuristic.impl.fixed.OddEvenHeuristic;
 import csp.heuristic.impl.random.RandomHeuristic;
 import csp.heuristic.impl.random.RandomStatic;
-import csp.heuristic.impl.value.LargestValueFirst;
 import solver.BinaryCSPSolver;
 
 /**
@@ -27,24 +26,7 @@ public final class BinaryCSPReader {
   private FileReader inFR ;
   private StreamTokenizer in ;
 
-  /**
-   * Main (for testing)
-   */
-  public static void main(String[] args) {
-    if (args.length != 1) {
-      System.out.println("Usage: java BinaryCSPReader <file.csp>") ;
-      return ;
-    }
-    BinaryCSPReader reader = new BinaryCSPReader() ;
-	BinaryCSP csp = reader.readBinaryCSP(args[0]);
-	csp.setHeuristic(new AscendingStatic());
-	System.out.println(csp);
-	System.out.println(csp.getHeuristic());
-	
-	BinaryCSPSolver solver = new BinaryCSPSolver(false);
-	solver.solveCSP(csp);
-	
-  }
+
   
   /**
    * File format:

@@ -1,6 +1,5 @@
 package test;
 
-
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import csp.heuristic.impl.fixed.OddEvenHeuristic;
 import csp.heuristic.impl.random.RandomHeuristic;
 import csp.heuristic.impl.random.RandomValueHeuristic;
 import csp.heuristic.impl.random.RandomVariableHeuristic;
-import csp.heuristic.impl.value.LargestValueFirst;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 
@@ -38,7 +36,7 @@ public class NQueensTest {
            });
     }
     private static BinaryCSPReader reader = new BinaryCSPReader();
-    private static BinaryCSPSolver solver = new BinaryCSPSolver(true);
+    private static BinaryCSPSolver solver = new BinaryCSPSolver(false, false);
     
     private int fInput;
     private int fExpected;

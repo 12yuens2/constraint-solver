@@ -22,7 +22,7 @@ import util.BinaryCSPReader;
 public class FourQueensTest {
 
     private static BinaryCSPReader reader = new BinaryCSPReader();
-    private static BinaryCSPSolver solver = new BinaryCSPSolver(true);
+    private static BinaryCSPSolver solver = new BinaryCSPSolver(false, false);
    
     private ArrayList<Solution> solutions;
 

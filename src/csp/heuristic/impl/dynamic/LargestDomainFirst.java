@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import csp.Variable;
 import csp.heuristic.Heuristic;
 
+/**
+ * Opposite of smallest domain first where the variable whose domain contains the most values left is chosen.
+ *
+ */
 public class LargestDomainFirst extends Heuristic {
 
     @Override

@@ -6,6 +6,10 @@ import java.util.TreeSet;
 import csp.Variable;
 import csp.heuristic.Heuristic;
 
+/**
+ * The smallest domain first heuristic chooses the variable whose domain contains the least number of values left.
+ *
+ */
 public class SmallestDomainFirst extends Heuristic {
 
     @Override

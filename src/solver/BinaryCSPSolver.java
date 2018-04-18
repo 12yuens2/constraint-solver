@@ -6,22 +6,88 @@ import csp.BinaryCSP;
 import csp.BinaryTuple;
 import csp.Solution;
 import csp.Variable;
+import csp.heuristic.Heuristic;
+import csp.heuristic.impl.dynamic.LargestDomainFirst;
+import csp.heuristic.impl.dynamic.SmallestDomainFirst;
+import csp.heuristic.impl.fixed.AscendingStatic;
+import csp.heuristic.impl.fixed.DescendingStatic;
+import csp.heuristic.impl.fixed.MaximumDegree;
+import csp.heuristic.impl.fixed.MinimumDegree;
+import csp.heuristic.impl.fixed.OddEvenHeuristic;
+import csp.heuristic.impl.random.RandomHeuristic;
+import csp.heuristic.impl.random.RandomStatic;
+import csp.heuristic.impl.random.RandomValueHeuristic;
+import csp.heuristic.impl.random.RandomVariableHeuristic;
+import util.BinaryCSPReader;
 import util.Logger;
 
 public class BinaryCSPSolver {
-   
+     /**
+       * Main (for testing)
+       */
+    public static void main(String[] args) {
+        if (args.length != 4) {
+          System.out.println("Usage: java BinaryCSPSolver <file.csp> <heuristic> <print-solutions> <debug-mode>") ;
+          return ;
+        }
+        BinaryCSPReader reader = new BinaryCSPReader() ;
+    	BinaryCSP csp = reader.readBinaryCSP(args[0]);
+    	
+    	Heuristic heuristic = getHeuristic(args[1], csp);
+    	csp.setHeuristic(heuristic);
+    	
+    	System.out.println(csp);
+    	System.out.println(csp.getHeuristic());
+    	
+    	BinaryCSPSolver solver = new BinaryCSPSolver(Boolean.valueOf(args[3]), Boolean.valueOf(args[2]));
+    	solver.solveCSP(csp);	
+    }
+    
+    public static Heuristic getHeuristic(String heuristicName, BinaryCSP csp) {
+        switch (heuristicName) {
+        case "sdf":
+            return new SmallestDomainFirst();
+        case "ldf":
+            return new LargestDomainFirst();
+        case "ascending":
+            return new AscendingStatic();
+        case "descending":
+            return new DescendingStatic();
+        case "max-degree":
+            return new MaximumDegree(csp);
+        case "min-degree":
+            return new MinimumDegree(csp);
+        case "odd-even":
+            return new OddEvenHeuristic();
+        case "random":
+            return new RandomHeuristic();
+        case "random-static":
+            return new RandomStatic(csp);
+        case "random-value":
+            return new RandomValueHeuristic();
+        case "random-variable":
+            return new RandomVariableHeuristic();
+        default:
+            System.out.println("Heursitic " + heuristicName + " unknown. Defaulting to static ascending.");
+            return new AscendingStatic();
+        }
+    }
+    
     private BinaryCSP csp;
     private ArrayList<Integer> droppedVals;
     private ArrayList<Solution> solutions;
     private HashMap<Variable, UndoTracker> undoMap;
   
     private boolean allSolutions;
+    private boolean printSolutions;
     private long timeTaken;
     private int revisions;
     private int nodes;
     
-	public BinaryCSPSolver(boolean getAllSolutions) {
-	    this.allSolutions = getAllSolutions;
+	public BinaryCSPSolver(boolean debug, boolean printSolutions) {
+	    Logger.displayMessage = debug;
+	    
+	    this.printSolutions = printSolutions;
 	    
 		/* Heuristic/algorithm to choose */
 	    this.droppedVals = new ArrayList<>();
@@ -31,8 +97,6 @@ public class BinaryCSPSolver {
 	
 	
 	public ArrayList<Solution> solveCSP(BinaryCSP csp) {
-//	    Logger.displayMessage = true;
-	    
 		resetAll(csp);
 		long timeBefore = System.nanoTime();
 		forwardChecking(csp.getVariables());
@@ -40,10 +104,14 @@ public class BinaryCSPSolver {
 		
 		timeTaken = timeAfter - timeBefore;
 
-//		for (Solution s : solutions) {
-//		    System.out.println(s);
-//		}
-		Logger.displayMessage = true;
+		
+		if (printSolutions) {
+		    for (Solution s : solutions) {
+		        System.out.println("Solution:");
+		        System.out.println(s);
+		    }
+		}
+//		Logger.displayMessage = true;
 		Logger.newline();
 		Logger.log(Logger.MessageType.INFO, "Problem=" + csp.getName());
 		Logger.log(Logger.MessageType.INFO, "Heuristic=" + csp.getHeuristic());
@@ -51,7 +119,7 @@ public class BinaryCSPSolver {
 		Logger.log(Logger.MessageType.INFO, "Search nodes=" + nodes);
 		Logger.log(Logger.MessageType.INFO, "Revisions=" + revisions);
 		Logger.log(Logger.MessageType.INFO, "Solutions=" + solutions.size());
-		Logger.displayMessage = false;
+//		Logger.displayMessage = false;
 		return solutions;
 	}
 	
@@ -152,9 +220,6 @@ public class BinaryCSPSolver {
 	        undoPruning(var);
 	       	return !var.getDomain().isEmpty();
 	    }
-	    // revise arc by removing values from variable domains
-	    // prune domain of futureVar
-	    // revision false if one variable has domain wipeout
 	}
 	
 	private boolean reviseConstraint(Variable futureVar, Variable var, int val) {
@@ -208,6 +273,7 @@ public class BinaryCSPSolver {
 	        return null;
 	    }
 	    if (constraints1 != null && constraints1.isEmpty()) {
+	        /* No constraints in the arc */
 	        return new ArrayList<>();
 	    }
 	    

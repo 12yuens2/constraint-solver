@@ -33,6 +33,8 @@ public final class BinaryCSP {
             if (bc.getFirstVar() == v1.getId() && bc.getSecondVar() == v2.getId()) {
                 return bc.getTuples();
             }
+            
+            /* Get the tuples in reverse if the arc is the other direction */
             if (bc.getFirstVar() == v2.getId() && bc.getSecondVar() == v1.getId()) {
                 return bc.getTuplesReverse();
             }

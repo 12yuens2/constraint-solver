@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 public class Solution {
 
+    /* Each solution contains a map of the variable and its assigned value */
     HashMap<Variable, Integer> varMap;
     
     public Solution() {
@@ -27,7 +28,7 @@ public class Solution {
             Variable v = entry.getKey();
             if (v.getId() == varId) return v;
         }
-        //TODO use exception?
+        
         return null;
     }
     

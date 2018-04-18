@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import csp.BinaryCSP;
 import csp.Variable;
 
+/**
+ * The opposite of Maximum degree ordering where the variable with the least number of constraints is chosen.
+ *
+ */
 public class MinimumDegree extends MaximumDegree {
 
     public MinimumDegree(BinaryCSP csp) {

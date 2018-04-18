@@ -14,9 +14,16 @@ import org.junit.runners.Parameterized.Parameters;
 import csp.BinaryCSP;
 import csp.Solution;
 import csp.heuristic.Heuristic;
+import csp.heuristic.impl.dynamic.LargestDomainFirst;
 import csp.heuristic.impl.dynamic.SmallestDomainFirst;
 import csp.heuristic.impl.fixed.AscendingStatic;
+import csp.heuristic.impl.fixed.DescendingStatic;
 import csp.heuristic.impl.fixed.MaximumDegree;
+import csp.heuristic.impl.fixed.MinimumDegree;
+import csp.heuristic.impl.fixed.OddEvenHeuristic;
+import csp.heuristic.impl.random.RandomHeuristic;
+import csp.heuristic.impl.random.RandomStatic;
+import csp.heuristic.impl.random.RandomValueHeuristic;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 
@@ -30,7 +37,7 @@ public class SudokuTest {
     }
     
     private static BinaryCSPReader reader = new BinaryCSPReader();
-    private static BinaryCSPSolver solver = new BinaryCSPSolver(true);
+    private static BinaryCSPSolver solver = new BinaryCSPSolver(false, false);
     
     private String fInput;
     private int fExpected;
@@ -60,11 +67,49 @@ public class SudokuTest {
         assertEquals(fExpected, solutions.size());
     }
     
+    @Test
+    public void descendingTest() {
+        BinaryCSP sudokuCSP = reader.readBinaryCSP("csp/sudoku/" + fInput);
+        sudokuCSP.setHeuristic(new DescendingStatic());
+        
+        ArrayList<Solution> solutions = solver.solveCSP(sudokuCSP);
+        assertEquals(fExpected, solutions.size());
+    }
+    
+    
+    @Test
+    public void minimumDegreeTest() {
+        BinaryCSP sudokuCSP = reader.readBinaryCSP("csp/sudoku/" + fInput);
+        sudokuCSP.setHeuristic(new MinimumDegree(sudokuCSP));
+        
+        ArrayList<Solution> solutions = solver.solveCSP(sudokuCSP);
+        assertEquals(fExpected, solutions.size());
+    }
+    
+    @Test
+    public void randomTest() {
+        BinaryCSP sudokuCSP = reader.readBinaryCSP("csp/sudoku/" + fInput);
+        sudokuCSP.setHeuristic(new RandomValueHeuristic());
+        
+        ArrayList<Solution> solutions = solver.solveCSP(sudokuCSP);
+        assertEquals(fExpected, solutions.size());
+    }
+    
+
     
 //    @Test
-//    public void MaximumDegreeTest() {
+//    public void oddEvenTest() {
 //        BinaryCSP sudokuCSP = reader.readBinaryCSP("csp/sudoku/" + fInput);
-//        sudokuCSP.setHeuristic(new MaximumDegree(sudokuCSP));
+//        sudokuCSP.setHeuristic(new OddEvenHeuristic());
+//        
+//        ArrayList<Solution> solutions = solver.solveCSP(sudokuCSP);
+//        assertEquals(fExpected, solutions.size());
+//    }
+//    
+//    @Test
+//    public void randomStaticTest() {
+//        BinaryCSP sudokuCSP = reader.readBinaryCSP("csp/sudoku/" + fInput);
+//        sudokuCSP.setHeuristic(new RandomStatic(sudokuCSP));
 //        
 //        ArrayList<Solution> solutions = solver.solveCSP(sudokuCSP);
 //        assertEquals(fExpected, solutions.size());

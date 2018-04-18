@@ -18,35 +18,35 @@ import csp.heuristic.impl.random.RandomHeuristic;
 import csp.heuristic.impl.random.RandomStatic;
 import csp.heuristic.impl.random.RandomValueHeuristic;
 import csp.heuristic.impl.random.RandomVariableHeuristic;
-import csp.heuristic.impl.value.LargestValueFirst;
 import solver.BinaryCSPSolver;
 import util.BinaryCSPReader;
 import util.CSVWriter;
 
 public class Experiment {
-   
 
     /**
      * Main for running experiments
      */
     public static void main(String[] args) {
+        if (args.length != 4) {
+            System.out.println("Usage: java -jar Experiment.jar <csp-folder> <output-csv> <runs> <print-solutions>");
+            System.exit(0);
+        }
         
         ArrayList<Heuristic> heuristics = new ArrayList<>();
+        heuristics.add(new SmallestDomainFirst());
         heuristics.add(new AscendingStatic());
         heuristics.add(new DescendingStatic());
-        heuristics.add(new SmallestDomainFirst());
         heuristics.add(new LargestDomainFirst());
         heuristics.add(new OddEvenHeuristic());
-        
-        heuristics.add(new LargestValueFirst());
         
         ArrayList<Heuristic> randomHeuristics = new ArrayList<>();
         randomHeuristics.add(new RandomHeuristic());
         randomHeuristics.add(new RandomVariableHeuristic());
         randomHeuristics.add(new RandomValueHeuristic());
         
-        Experiment ex = new Experiment("langfords", "langfords.csv", true, heuristics, randomHeuristics);
-        ex.run(200);
+        Experiment ex = new Experiment(args[0], args[1], true, heuristics, randomHeuristics, Boolean.valueOf(args[3]));
+        ex.run(Integer.parseInt(args[2]));
         ex.writeResults();
     }
    
@@ -61,10 +61,10 @@ public class Experiment {
     private ArrayList<String> instances;
     
     public Experiment(String problemName, String outputFile, boolean allSolutions, 
-            ArrayList<Heuristic> heuristics, ArrayList<Heuristic> randomHeuristics) {
+            ArrayList<Heuristic> heuristics, ArrayList<Heuristic> randomHeuristics, boolean printSolutions) {
         this.writer = new CSVWriter(outputFile);
         this.reader = new BinaryCSPReader();
-        this.solver = new BinaryCSPSolver(allSolutions);
+        this.solver = new BinaryCSPSolver(allSolutions, printSolutions);
         
         this.results = new ArrayList<>();
         

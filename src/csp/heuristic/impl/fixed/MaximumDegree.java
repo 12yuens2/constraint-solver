@@ -8,6 +8,11 @@ import csp.BinaryTuple;
 import csp.Variable;
 import csp.heuristic.Heuristic;
 
+/**
+ * Choose the variable that is the most constrained based on the primal graph.
+ * The primal graph is computed at the beginning, making this a static ordering.
+ *
+ */
 public class MaximumDegree extends Heuristic {
 
     protected HashMap<Variable, Integer> primalGraph;
