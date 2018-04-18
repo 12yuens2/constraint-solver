@@ -163,7 +163,7 @@ The three metrics were all chosen for various reasons:
 \end{itemize}
 
 \subsection{Experiments}
-Multiple runs of the experiments were done to ensure reliable results for using the random heuristics. The number of search nodes and revisions do not normally require multiple iterations because they are deterministic, so every run would lead to the same resulting number of arc revisions and solver nodes. However a random heuristic that randomly chooses the next variable to assign would require the extra runs to determine an average number of nodes and arc revisions. Furthermore, because the time taken was also measured, the additional runs were needed to find an average time. Because of time benchmarking issues in Java due to the JVM \cite{jvm-benchmark}, the time taken is not unreliable without a robust benchmarking framework. 
+Multiple runs of the experiments were done to ensure reliable results for using the random heuristics. The number of search nodes and revisions do not normally require multiple iterations because they are deterministic, so every run would lead to the same resulting number of arc revisions and solver nodes. However a random heuristic that randomly chooses the next variable to assign would require the extra runs to determine an average number of nodes and arc revisions. Furthermore, because the time taken was also measured, the additional runs were needed to find an average time. Because of time benchmarking issues in Java due to the JVM, the time taken is not unreliable without a robust benchmarking framework. 
 \n
 To run the experiments, an \texttt{Experiment} class was developed that could take a list of heuristics, number of runs and constraint problems and run the solver, returning a \texttt{Result} object which contained the time taken, number of solver nodes and number of arc revisions averaged over all the runs. 
 
@@ -670,10 +670,8 @@ In conclusion, a forward checking constraint solver was implemented. The solver 
 \n
 Next, different heuristics were implemented for the solver to use, which included a dynamic variable heuristic (smallest domain first) and static variable heuristics such as maximum degree. Further, random heuristics were tested to show the different affect of variable and value selection. 
 \n
-Finally, the heuristics were run on the various different problems where the time taken, number of solver nodes and number of arc revisions were measured to show the difference between the heuristics, especially the difference between a dynamic heuristic like smallest domain first, and a static heuristic like maximum degree. When looking at the N-queens problem, it appeared that static heuristics did not perform as well as dynamic heuristics. However, the Langfords' problems showed that this was not always the case, as a descending static order was able to perform significantly better than a smallest domain first heuristic. This demonstrated that a good static order built for specific problems could perform very well, but would be highly problem dependent while dynamic heuristics like smallest domain first could work well in most general cases. TODO sudoku
+Finally, the heuristics were run on the various different problems where the time taken, number of solver nodes and number of arc revisions were measured to show the difference between the heuristics, especially the difference between a dynamic heuristic like smallest domain first, and a static heuristic like maximum degree. When looking at the N-queens problem, it appeared that static heuristics did not perform as well as dynamic heuristics. However, the Langfords' problems showed that this was not always the case, as a descending static order was able to perform significantly better than a smallest domain first heuristic. This demonstrated that a good static order built for specific problems could perform very well, but would be highly problem dependent. The sudoku problems continued to show that dynamic heuristics like smallest domain first could work well in most general cases as certain many static heuristics could not finish for the sudoku problems. 
 
-
-\printbibliography
 
 \end{document}
 

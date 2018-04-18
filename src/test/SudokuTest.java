@@ -96,7 +96,7 @@ public class SudokuTest {
     }
     
 
-    
+/* Below tests take a while to complete */ 
 //    @Test
 //    public void oddEvenTest() {
 //        BinaryCSP sudokuCSP = reader.readBinaryCSP("csp/sudoku/" + fInput);

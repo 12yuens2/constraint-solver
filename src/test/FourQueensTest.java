@@ -54,25 +54,7 @@ public class FourQueensTest {
         assertEquals(3, s2.getVarValue(rows.get(2)));
         assertEquals(1, s2.getVarValue(rows.get(3)));
     }
-//    
-//    @Test
-//    public void test6Queens() {
-//        BinaryCSP sixQueensCSP = getCSP("csp/6Queens.csp");
-//        ArrayList<Solution> sixQueensSolutions = solver.solveCSP(sixQueensCSP);
-//        
-//        /* There are 4 solutions to the 6 Queens problem */
-//        assertEquals(4, sixQueensSolutions.size());
-//    }
-//
-//    
-//    @Test
-//    public void test8Queens() {
-//        BinaryCSP eightQueensCSP = getCSP("csp/8Queens.csp");
-//        ArrayList<Solution> eightQueensSolutions = solver.solveCSP(eightQueensCSP);
-//        
-//        /* There are 92 solutions to the 6 Queens problem */
-//        assertEquals(92, eightQueensSolutions.size());
-//    }
+
     
     
         
