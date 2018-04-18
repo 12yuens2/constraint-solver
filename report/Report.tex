@@ -158,16 +158,20 @@ Further, tests were written for each heuristic to make sure each heuristic was n
 \subsection{Metrics used}
 
 Multiple metrics were used to empirically measure the performance of different heuristics. Time, number of solver nodes and number of arc revisions were all used as metrics. The number of solver nodes was calculated as the number of times \texttt{forwardChecking()} was called and did not return immediately as it represents a step down into the recursion and search tree. The number of arc revisions was calculated each time a constraint between two variables was revised. For example, if there are two variables and two and three values in their domains respectively, the number of arc revisions between one variable to another is 6. Finally the time taken only takes into account the time the solver took to solve the problem and find all solutions rather than the total time of the whole process. 
+\n
+The three metrics were all chosen for various reasons:
+\begin{itemize}
+\item \textbf{Solver nodes} - The number of solver nodes tells us how large of a search tree had to be explored in order to find the solutions. If different heuristics give different numbers of search nodes, it tells us that the heuristic had to do more or less searching by giving the size of the search tree. Because all solutions are found in our experiments, the search does have to be exhaustive. However, a more effective heuristic would prune more domain values earlier in forward checking and therefore have a smaller search tree with less nodes. 
+\item \textbf{Arc revisions} - The reason the number of arc revisions was measured is similar to why solver nodes is  measured. The number of arc revisions give an even more detailed look at how much work is being done at each node of the search tree. Had an algorithm like AC3 been implemented, the number of arc revisions would also help in differentiating the different between forward checking and maintaining arc consistency, as it would cost more revisions to maintain arc consistency, but search less nodes. 
+\item \textbf{Time taken} - The time taken was chosen because ultimately an important aspect of solvers is how long it takes. A complicated algorithm could solver constraint satisfaction problems in fewer revisions and search nodes, but take a lot of time, so it is still valuable to measure the time needed. 
+\end{itemize}
 
 \subsection{Experiments}
-Multiple runs of the experiments were done to ensure reliable results for using the random heuristics. The number of search nodes and revisions do not normally require multiple iterations because they are deterministic, so every run would lead to the same resulting number of arc revisions and solver nodes. However a ``random" heuristic that randomly chooses the next variable to assign would require the extra runs to determine an average number of nodes and arc revisions.
-\n
-The time taken was also measured during the experiments for completeness. Due to time benchmarking issues in Java due to the JVM \cite{jvm-benchmark}, the time taken is not unreliable without a robust benchmarking framework. 
+Multiple runs of the experiments were done to ensure reliable results for using the random heuristics. The number of search nodes and revisions do not normally require multiple iterations because they are deterministic, so every run would lead to the same resulting number of arc revisions and solver nodes. However a random heuristic that randomly chooses the next variable to assign would require the extra runs to determine an average number of nodes and arc revisions. Furthermore, because the time taken was also measured, the additional runs were needed to find an average time. Because of time benchmarking issues in Java due to the JVM \cite{jvm-benchmark}, the time taken is not unreliable without a robust benchmarking framework. 
 \n
 To run the experiments, an \texttt{Experiment} class was developed that could take a list of heuristics, number of runs and constraint problems and run the solver, returning a \texttt{Result} object which contained the time taken, number of solver nodes and number of arc revisions averaged over all the runs. 
 
 \section{Results and analysis}
-
 % #1 - Plot title
 % #2 - x axis data
 % #3 - y axis data
@@ -192,7 +196,7 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 		discard if not={Heuristic}{No heuristic},
 %		discard if larger={Instance}{6}
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
-\addlegendentry{No heuristic}
+\addlegendentry{Ascending Static}
 
 \addplot+[only marks, fill opacity=0.2,
 		discard if not={Heuristic}{Maximum Degree},
@@ -210,40 +214,36 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \end{tikzpicture}
 }
 
-\newcommand{\sixplot}[2]{
-\begin{figure}[H]
-\centering
+\newcommand{\sixplot}[3]{
 \begin{minipage}{0.31\textwidth}
-\cspplot{#1 instances against solver nodes}{Instance}{SolverNodes}{#2}
+#3{#1 instances against solver nodes}{Instance}{SolverNodes}{#2}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-\cspplot{#1 instances against arc revisions}{Instance}{ArcRevisions}{#2}
+#3{#1 instances against arc revisions}{Instance}{ArcRevisions}{#2}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-\cspplot{#1 instances against time taken}{Instance}{SolverTime}{#2}
+#3{#1 instances against time taken}{Instance}{SolverTime}{#2}
 \end{minipage}
 
 \hspace{0.5cm}
 
 \begin{minipage}{0.31\textwidth}
-\cspplot{#1 solver time against solver nodes}{SolverTime}{SolverNodes}{#2}
+#3{#1 solver time against solver nodes}{SolverTime}{SolverNodes}{#2}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-\cspplot{#1 solver time against arc revisions}{SolverTime}{ArcRevisions}{#2}
+#3{#1 solver time against arc revisions}{SolverTime}{ArcRevisions}{#2}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-\cspplot{#1 solver nodes against arc revisions}{SolverNodes}{ArcRevisions}{#2}
+#3{#1 solver nodes against arc revisions}{SolverNodes}{ArcRevisions}{#2}
 \end{minipage}
-\caption{#1 problem performance with different metrics}
-\end{figure}
 }
 
 \newcommand{\randomplot}[4] {
-\begin{tikzpicture}
+\begin{tikzpicture}[scale=0.55]
 \begin{axis}[
 	title = {\textbf{#1}},
 	legend pos=south east,
@@ -279,7 +279,7 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \end{tikzpicture}
 }
 
-\newcommand{\barplot}[4]{
+\newcommand{\bargraphrandom}[4]{
 \begin{tikzpicture}
 \begin{axis}[
 	title = {\textbf{#1}},
@@ -295,24 +295,24 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 	ylabel={#3}
 ]
 
-\addplot+[fill opacity=0.2,
+\addplot+[
 		discard if not={Heuristic}{Random static},
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
 \addlegendentry{Random static}
 
-\addplot+[fill opacity=0.2,
+\addplot+[
 		discard if not={Heuristic}{Random variable},
 %		discard if larger={Instance}{6}
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
 \addlegendentry{Random variable}
 
-\addplot+[fill opacity=0.2,
+\addplot+[
 		discard if not={Heuristic}{Random value},
 %		discard if larger={Instance}{6}
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
 \addlegendentry{Random value}
 
-\addplot+[fill opacity=0.2,
+\addplot+[
 		discard if not={Heuristic}{Random},
 %		discard if larger={Instance}{6}
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
@@ -322,52 +322,142 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \end{tikzpicture}
 }
 
+\newcommand{\barplot}[4]{
+\addplot+[
+		discard if not={Heuristic}{#1},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{#1}
+}
+
+\newcommand{\bargraph}[4]{
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{#1}},
+	bar width=0.3cm,
+	ybar,
+	legend pos=south east,
+	enlarge x limits=0.4,
+	ymode=log,
+	xlabel={#2},
+	xtick={23,24},
+	xticklabels={langfords2-3, langfords2-4},
+	legend pos=outer north east,
+	ylabel={#3}
+]
+\addplot+[
+		discard if not={Heuristic}{No heuristic},
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Static Ascending}
+
+\barplot{Static Descending}{#2}{#3}{#4}
+\barplot{Smallest Domain First}{#2}{#3}{#4}
+\barplot{Largest Domain First}{#2}{#3}{#4}
+\barplot{Odd even}{#2}{#3}{#4}
+\barplot{Maximum Degree}{#2}{#3}{#4}
+
+
+\addplot+[
+		discard if not={Heuristic}{Minimum degree},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Minimum Degree}
+
+
+
+\end{axis}
+\end{tikzpicture}
+}
+
+
+\subsection{N-queens problem}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{Solver nodes required for 8 Queens instance}},
+	bar width=0.5cm,
+	ybar,
+	legend pos=south east,
+	%enlarge x limits=0.4,
+	ymode=log,
+	ytick={1000,3162,10000},
+	height=5cm,
+	width=12cm,
+	xlabel={Heuristic},
+	%xtick={23,24},
+	%xticklabels={langfords2-3, langfords2-4},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Largest Domain First,Odd even,Maximum Degree,Minimum degree},
+	x tick label style={font=\small,text width=1.5cm,align=center},
+	legend pos=outer north east,
+	ylabel={SolverNodes},
+	xlabel style={yshift=-1cm}
+]
+
+\addplot coordinates {(Static Ascending, 1724) (Static Descending, 1724) (Smallest Domain First, 1360) (Largest Domain First, 27138) (Odd even, 2132) (Maximum Degree, 1612) (Minimum degree, 2592)};
+
+\end{axis}
+\end{tikzpicture}
+\hspace{1cm}
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{Solver nodes required for 8 Queens instance with random heuristics}},
+	bar width=0.5cm,
+	ybar,
+	legend pos=south east,
+	ymode=log,
+	height=5cm,
+	width=12cm,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Random, Random static, Random variable, Random value, Smallest Domain First, Largest Domain First},
+	x tick label style={font=\small,text width=1.5cm,align=center},
+	legend pos=outer north east,
+	ylabel={SolverNodes},
+	xlabel style={yshift=-1cm}
+]
+
+\addplot coordinates {(Random,5942) (Random static,2212) (Random variable,8716) (Random value,1724)};
+
+\end{axis}
+\end{tikzpicture}
+\caption{Bar plot}
+\end{figure}
+
 
 
 
 
 \begin{figure}[H]
 \centering
-\sixplot{N queens}{queens2.csv}
+\sixplot{N queens}{queens2.csv}{\cspplot}
 \caption{N queens problem performance with different metrics and heuristics.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\barplot{Langfords}{Instance}{SolverNodes}{langfords.csv}
+\sixplot{N queens}{queens.csv}{\randomplot}
+\caption{N queens problem performance of random heuristics}
+\end{figure}
+
+
+
+\subsection{Langfords}
+\begin{figure}[H]
+\centering
+\bargraph{Langfords}{Instance}{SolverNodes}{langfords.csv}
 \caption{Langfords problem with different metrics and heuristics.}
 \end{figure}
 
-
-
 \begin{figure}[H]
 \centering
-\cspplot{N queens problem}{Instance}{ArcRevisions}{queens2.csv}
-\caption{}
+\bargraphrandom{Langfords}{Instance}{SolverNodes}{langfords.csv}
+\caption{Langfords problem with random heuristics.}
 \end{figure}
 
 
-\begin{figure}[H]
-\centering
-\cspplot{N queens problem}{ArcRevisions}{SolverNodes}{queens2.csv}
-\caption{}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\randomplot{N queens problem}{Instance}{SolverNodes}{queens.csv}
-\caption{}
-\end{figure}
-\begin{figure}[H]
-\centering
-\randomplot{N queens problem}{Instance}{ArcRevisions}{queens.csv}
-\caption{}
-\end{figure}
-\begin{figure}[H]
-\centering
-\randomplot{N queens problem}{ArcRevisions}{SolverNodes}{queens.csv}
-\caption{}
-\end{figure}
 
 \section{Conclusion and evaluation}
 
