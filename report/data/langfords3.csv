@@ -1,0 +1,21 @@
+[INFO]: Problem=csp/langfords/langfords3_9.csp
+[INFO]: Heuristic=Smallest Domain First
+[INFO]: Time taken=129304210144
+[INFO]: Search nodes=785991
+[INFO]: Revisions=43222309
+[INFO]: Solutions=6
+
+[INFO]: Problem=csp/langfords/langfords3_9.csp
+[INFO]: Heuristic=No heuristic
+[INFO]: Time taken=140403566558
+[INFO]: Search nodes=785991
+[INFO]: Revisions=43222309
+[INFO]: Solutions=6
+
+[INFO]: Problem=csp/langfords/langfords3_9.csp
+[INFO]: Heuristic=Static Descending
+[INFO]: Time taken=11997086019
+[INFO]: Search nodes=78369
+[INFO]: Revisions=4364467
+[INFO]: Solutions=6
+
