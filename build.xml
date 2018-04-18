@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<project name="BinaryCSP" basedir="." default="all">
+
+
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+    <property name="solver" location="./BinaryCSPReader.jar" />
+
+    <path id="BinaryCSPReader.classpath">
+      <pathelement location="${src}"/>
+      <pathelement location="${build}$"/>
+      <pathelement location="lib/junit.jar"/>
+      <pathelement location="lib/hamcrest.jar"/>
+      <pathelement location="lib/junit-jupiter.jar"/>
+    </path>
+    
+    <target name="all" depends="init, compile, dist">
+    </target>
+
+    <target name="init">
+      <mkdir dir="${build}"/>
+    </target>
+
+    <target name="compile" depends="init">
+      <javac srcdir="${src}" destdir="${build}" includeantruntime="false">
+	<src path="src"/>
+	<classpath refid="BinaryCSPReader.classpath"/>
+      </javac>
+    </target>
+
+    <target name="dist" depends="compile">
+      <jar jarfile="${solver}" basedir="${build}">
+	<manifest>
+	  <attribute name="Main-Class" value="util.BinaryCSPReader" />
+	</manifest>
+      </jar>
+    </target>
+<!--
+    <target name="solver" depends="dist">
+      <java classname="util.BinaryCSPReader" failonerror="true" fork="true">
+	<classpath>
+	  <path refid="BinaryCSPReader.classpath" />
+	  <path location="${solver}" />
+	</classpath>
+      </java>
+    </target>
+-->
+    <target name="junit" depends="compile">
+	<junit printsummary="yes" haltonfailure="no" showoutput="true">
+	    <classpath>
+	        <pathelement location="lib/junit.jar"/>
+	        <pathelement location="lib/hamcrest.jar"/>
+	        <pathelement location="lib/junit-jupiter.jar"/>
+		<pathelement location="${src}/test"/>
+		<pathelement location="${build}"/>
+	    </classpath>
+
+	    <batchtest fork="yes">
+		<fileset dir="${src}/test">
+                    <include name="**/*Test*.java" />
+                </fileset>
+            </batchtest>
+	</junit>
+
+    </target>
+
+    <target name="clean">
+      <delete dir="${build}"/>
+      <delete file="${solver}"/>
+    </target>
+</project>
+
