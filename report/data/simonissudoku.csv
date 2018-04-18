@@ -1,0 +1,8 @@
+Heuristic,SolverTime,SolverNodes,ArcRevisions,NumSolutions,
+Smallest Domain First,80.248208,81,3240,1,
+No heuristic,267.059383,382,32142,1,
+Static Descending,220.125111,247,28841,1,
+Odd even,56579.50197,71477,8689977,1,
+Random value,204.478653,382,32142,1,
+Minimum degree,118.846405,398,17364,1,
+Random static,43557.741951,46142,6551838,1,

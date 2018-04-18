@@ -144,10 +144,6 @@ The only dynamic heuristics implemented was smallest domain first and its invers
 \subsubsection{Random heuristics}
 Random heuristics were implemented for empirical testing to see how they would perform if a random variable or value assignment was chosen on every step. The three different random heuristics (\texttt{Random}, \texttt{RandomVariable} and \texttt{RandomValue}) also allow us to see the difference between variable and value heuristics. \texttt{Random} randomly chooses both variable and value, while \texttt{RandomVariable} and \texttt{RandomValue} only choose the variable and value respectively as their name implies. The random nature of these heuristics combined with many iterations should be able to show any differences between choosing the variable and value, showing if one may impact performance more than another. There is also a fourth \texttt{RandomStatic} heuristic, which statically chooses the random order at the beginning rather than choosing randomly every step. This is subtly different from a dynamic random order because each left subtree that is explored will stay in the same random order, whereas choosing randomly dynamically will change every subtree to be different and random. 
 
-\subsubsection{Value heuristics}
-The idea of using value heuristics seems very problem dependent. For certain problems, the value of the variable may matter, but it may not matter for others. As such TODO
-
-
 \section{Experimental methodology}
 
 \subsection{Testing}
@@ -176,15 +172,23 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 % #2 - x axis data
 % #3 - y axis data
 % #4 - csv file
-\newcommand{\cspplot}[4]{
+\newcommand{\cspplot}[6]{
 \begin{tikzpicture}[scale=0.55]
 \begin{axis}[
 	title = {\textbf{#1}},
-	legend pos=south east,
+	legend pos=#6,
 	ymode=log,
 	xlabel={#2},
 	ylabel={#3}
 ]
+
+
+
+\addplot+[only marks, fill opacity=0.2,
+		discard if not={Heuristic}{No heuristic},
+%		discard if larger={Instance}{6}
+] table [x=#2, y=#3, col sep=comma] {data/#4};
+\addlegendentry{Static Ascending}
 
 \addplot+[only marks, fill opacity=0.2,
 		discard if not={Heuristic}{Smallest Domain First},
@@ -193,10 +197,10 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \addlegendentry{SDF}
 
 \addplot+[only marks, fill opacity=0.2,
-		discard if not={Heuristic}{No heuristic},
+		discard if not={Heuristic}{Largest Domain First},
 %		discard if larger={Instance}{6}
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
-\addlegendentry{Ascending Static}
+\addlegendentry{LDF}
 
 \addplot+[only marks, fill opacity=0.2,
 		discard if not={Heuristic}{Maximum Degree},
@@ -210,43 +214,45 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
 \addlegendentry{Random}
 
+
+#5
 \end{axis}
 \end{tikzpicture}
 }
 
 \newcommand{\sixplot}[3]{
 \begin{minipage}{0.31\textwidth}
-#3{#1 instances against solver nodes}{Instance}{SolverNodes}{#2}
+#3{#1 instances against solver nodes}{Instance}{SolverNodes}{#2}{\legend{};}{north east}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-#3{#1 instances against arc revisions}{Instance}{ArcRevisions}{#2}
+#3{#1 instances against arc revisions}{Instance}{ArcRevisions}{#2}{\legend{};}{north east}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-#3{#1 instances against time taken}{Instance}{SolverTime}{#2}
+#3{#1 instances against time taken}{Instance}{SolverTime}{#2}{}{outer north east}
 \end{minipage}
 
 \hspace{0.5cm}
 
 \begin{minipage}{0.31\textwidth}
-#3{#1 solver time against solver nodes}{SolverTime}{SolverNodes}{#2}
+#3{#1 solver time against solver nodes}{SolverTime}{SolverNodes}{#2}{}{south east}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-#3{#1 solver time against arc revisions}{SolverTime}{ArcRevisions}{#2}
+#3{#1 solver time against arc revisions}{SolverTime}{ArcRevisions}{#2}{}{south east}
 \end{minipage}
 %
 \begin{minipage}{0.31\textwidth}
-#3{#1 solver nodes against arc revisions}{SolverNodes}{ArcRevisions}{#2}
+#3{#1 solver nodes against arc revisions}{SolverNodes}{ArcRevisions}{#2}{}{south east}
 \end{minipage}
 }
 
-\newcommand{\randomplot}[4] {
+\newcommand{\randomplot}[6] {
 \begin{tikzpicture}[scale=0.55]
 \begin{axis}[
 	title = {\textbf{#1}},
-	legend pos=south east,
+	legend pos=#6,
 	ymode=log,
 	xlabel={#2},
 	ylabel={#3}
@@ -275,12 +281,13 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
 \addlegendentry{Random}
 
+#5
 \end{axis}
 \end{tikzpicture}
 }
 
-\newcommand{\bargraphrandom}[4]{
-\begin{tikzpicture}
+\newcommand{\bargraphrandom}[5]{
+\begin{tikzpicture}[scale=0.7]
 \begin{axis}[
 	title = {\textbf{#1}},
 	bar width=0.3cm,
@@ -318,6 +325,7 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 ] table [x=#2, y=#3, col sep=comma] {data/#4};
 \addlegendentry{Random}
 
+#5
 \end{axis}
 \end{tikzpicture}
 }
@@ -330,8 +338,8 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \addlegendentry{#1}
 }
 
-\newcommand{\bargraph}[4]{
-\begin{tikzpicture}
+\newcommand{\bargraph}[5]{
+\begin{tikzpicture}[scale=0.7]
 \begin{axis}[
 	title = {\textbf{#1}},
 	bar width=0.3cm,
@@ -356,21 +364,27 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 \barplot{Odd even}{#2}{#3}{#4}
 \barplot{Maximum Degree}{#2}{#3}{#4}
 
-
-\addplot+[
-		discard if not={Heuristic}{Minimum degree},
-%		discard if larger={Instance}{6}
-] table [x=#2, y=#3, col sep=comma] {data/#4};
-\addlegendentry{Minimum Degree}
-
-
-
+#5
 \end{axis}
 \end{tikzpicture}
 }
 
+From running the solver on the various constraint satisfaction problems provided, the time taken, number of solver nodes and number or arc revisions were measured and compared. It made little sense to compare them in the same graph as each metric gave values on different scales, however, they are plotted beside each other to see if there is any difference between them. Additionally, the three metrics are plot against each other to show their relationship to each other. The graphs are all plot on log scales. As the size of an problem instance grows, the time, nodes and revisions taken grow exponentially, making it difficult to determine their relationship on a normal scale. Moreover, each of the three constraint satisfaction problems tested (N-queens, langfords and sudoku) are analysed separately. Because the problems are completely different problems, it made little sense to put them into the same graphs. However, connections are drawn between any similarities and differences between the problems. 
+
 
 \subsection{N-queens problem}
+For the N-queens problem, we first look at how the time, nodes and revisions grow as the problem instance becomes larger (larger N). Comparing a few of the heuristics, we can see the largest domain first and random heuristic perform significantly worse compared to the other heuristics. This is expected and makes a lot of sense. The largest domain first heuristic is close to the worst case, as the variables with the most values left in its domain are always selected, making it more difficult to prune. This can be seen to be worse than randomly choosing on every step, which already performs poorly in comparison to all other heuristics. The random heuristic also performs poorly as expected as it contains no pattern of selecting variables in a smart way. 
+
+\begin{figure}[H]
+\centering
+\sixplot{N queens}{queens2.csv}{\cspplot}
+\caption{N queens problem performance with different metrics and heuristics.}
+\end{figure}
+\noindent
+The log graphs here show that though there are small differences between the 3 metrics, they are all comparable to each other, as we get a log curve on the log scale. 
+\n
+Next we can observe the heuristics in more detail by looking at one specific N-queens problem instance. The static ascending and descending heuristics perform very similarly while smallest domain first and maximum degree heuristic perform better. This was again expected as both SDF and maximum degree take into account the difficulty of the problem. SDF performs better as it adjusts dynamically during exploration while the ordering for maximum degree was determined at the beginning. We can still see that a clever static ordering with maximum degree was able to achieve better performance than a simple ascending/descending ordering. Further, static orderings that are not very smart such as alternating odd/even variables and minimum degree perform worse. It is slightly surprising there is so little difference between the three metrics for the different heuristics. The best heuristic performs the best for all three metrics and vice versa for the worst performing heuristic. Though this shows the heuristics performing consistently, it should be possible that some heuristics solve less nodes with more time if a lot of extra work has to be done. Because the heuristics used here are not very complicated, not much difference between the three metrics can be seen. 
+
 
 \begin{figure}[H]
 \centering
@@ -381,85 +395,283 @@ To run the experiments, an \texttt{Experiment} class was developed that could ta
 	ybar,
 	legend pos=south east,
 	%enlarge x limits=0.4,
-	ymode=log,
-	ytick={1000,3162,10000},
-	height=5cm,
+	height=3cm,
 	width=12cm,
 	xlabel={Heuristic},
 	%xtick={23,24},
 	%xticklabels={langfords2-3, langfords2-4},
 	xtick=data,
-	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Largest Domain First,Odd even,Maximum Degree,Minimum degree},
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Odd even,Maximum Degree,Minimum degree},
 	x tick label style={font=\small,text width=1.5cm,align=center},
 	legend pos=outer north east,
 	ylabel={SolverNodes},
 	xlabel style={yshift=-1cm}
 ]
 
-\addplot coordinates {(Static Ascending, 1724) (Static Descending, 1724) (Smallest Domain First, 1360) (Largest Domain First, 27138) (Odd even, 2132) (Maximum Degree, 1612) (Minimum degree, 2592)};
+\addplot coordinates {(Static Ascending, 1724) (Static Descending, 1724) (Smallest Domain First, 1360) (Odd even, 2132) (Maximum Degree, 1612) (Minimum degree, 2592)};
 
 \end{axis}
 \end{tikzpicture}
-\hspace{1cm}
+\\
 \begin{tikzpicture}
 \begin{axis}[
-	title = {\textbf{Solver nodes required for 8 Queens instance with random heuristics}},
+	title = {\textbf{Arc revisions required for 8 Queens instance}},
 	bar width=0.5cm,
 	ybar,
 	legend pos=south east,
-	ymode=log,
-	height=5cm,
+	height=3cm,
 	width=12cm,
 	xlabel={Heuristic},
 	xtick=data,
-	symbolic x coords = {Random, Random static, Random variable, Random value, Smallest Domain First, Largest Domain First},
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Odd even,Maximum Degree,Minimum degree},
 	x tick label style={font=\small,text width=1.5cm,align=center},
 	legend pos=outer north east,
-	ylabel={SolverNodes},
+	ylabel={ArcRevisions},
 	xlabel style={yshift=-1cm}
 ]
 
-\addplot coordinates {(Random,5942) (Random static,2212) (Random variable,8716) (Random value,1724)};
-
+\addplot coordinates {(Static Ascending, 7992) (Static Descending, 8162) (Smallest Domain First, 6168) (Odd even, 11472) (Maximum Degree, 7666) (Minimum degree, 14644)};
 \end{axis}
 \end{tikzpicture}
-\caption{Bar plot}
+\\
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{Time in seconds required for 8 Queens instance}},
+	bar width=0.5cm,
+	ybar,
+	legend pos=south east,
+	height=3cm,
+	width=12cm,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Odd even,Maximum Degree,Minimum degree},
+	x tick label style={font=\small,text width=1.5cm,align=center},
+	legend pos=outer north east,
+	ylabel={SolverTime},
+	xlabel style={yshift=-1cm}
+]
+
+\addplot coordinates {(Static Ascending, 8.12) (Static Descending, 8.18) (Smallest Domain First, 6.57) (Odd even, 10.1) (Maximum Degree, 7.46) (Minimum degree, 13.36)};
+\end{axis}
+\end{tikzpicture}
+\caption{Performance of different heuristics on the 8-Queens problem. Heuristics that performance significantly worse such as largest domain first and random and excluded here.}
 \end{figure}
-
-
-
-
-
-\begin{figure}[H]
-\centering
-\sixplot{N queens}{queens2.csv}{\cspplot}
-\caption{N queens problem performance with different metrics and heuristics.}
-\end{figure}
+\noindent
+It was briefly touched on earlier than the random heuristic performed worse than all other heuristics, but not as badly as largest domain first. What is interesting to find out next is if there is a big difference between different random heuristics. This will further show which aspect of the heuristic is of more importance as different specific aspects are randomised. 
 
 \begin{figure}[H]
 \centering
 \sixplot{N queens}{queens.csv}{\randomplot}
 \caption{N queens problem performance of random heuristics}
 \end{figure}
+\noindent
+From the four random heuristics tested, it can be seen clearly that the completely random heuristic and random variable heuristic perform worse. This shows two things:
+\begin{enumerate}
+\item Variable ordering is more important than value ordering in general - This is shown from the improved performance of random value ordering compared to the other three random heuristics, all of which included random variable ordering. The random value ordering was simply a static ascending order and its performance was not heavily impacted by the random value selection, as it took almost the same number of solver nodes and arc revisions as the completely static ascending heuristic. 
+\item Having some form of order, even if a random order is better than always choosing randomly - By using a random static order, the same order is kept throughout solving the problem. The metrics measured for this approach is closely comparable to the odd even variable heuristic, showing how the two are almost equivalent, even from mixing up the order of the variables differently. Of course this may not apply to every problem, especially if a problem took advantage of an odd/even ordering, however, if it doesn't matter then a static random ordering is just as good. 
+\end{enumerate}
 
 
 
 \subsection{Langfords}
+For langfords problem, multiple runs were not able to be completed easily due to the difficulty of the harder langfords (n = 3) problems taking too much time. As such, the time taken and random heuristics could not be measured for langfords problems where n \neq\ 2. Because the langfords problems for n = 3 are more difficult problems that take more search nodes and revisions, it is interesting to see how the heuristics are affected when the problems are more complex.  
 \begin{figure}[H]
 \centering
-\bargraph{Langfords}{Instance}{SolverNodes}{langfords.csv}
+\begin{minipage}{0.45\textwidth}
+\bargraph{Langfords}{Instance}{SolverNodes}{langfords.csv}{\legend{};}
+\end{minipage}
+%
+\begin{minipage}{0.45\textwidth}
+\bargraph{Langfords}{Instance}{ArcRevisions}{langfords.csv}{}
+\end{minipage}
 \caption{Langfords problem with different metrics and heuristics.}
 \end{figure}
+\noindent
+For the smaller langfords problem, there is different pattern seen between the different heuristics. The best heuristic is a static descending order and the maximum degree ordering. This is different from the N-queens problem, where smallest domain first performed much better than all other heuristics. From this result, we can see that it is not always the case that dynamic heuristics like smallest domain first perform the best and static heuristics can be better depending on the problem and problem size. Here, the descending static order is able to perform well because the last variable is the hardest to search for. This is due to the properties of langford's problem, where the arrangement of the digits is important. Finding what the last digit is greatly helps reduce the domains needed to search which is why descending works well. Maximum degree is able to find the same performance because the last variable is the most constrained and so it also solves in descending order. Smallest domain first alone does not help as each variable has the same domain and the heuristic cannot infer any more information that can help it improve. 
+\n
+The graphs of the random heuristics show a similar pattern to the N-queens problem. The variable assignments can be seen to have a greater impact, as fully random and random variable ordering is much worse than a random static and random value ordering. 
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+\bargraphrandom{Langfords}{Instance}{SolverNodes}{langfords.csv}{\legend{};}
+\end{minipage}
+%
+\begin{minipage}{0.45\textwidth}
+\bargraphrandom{Langfords}{Instance}{ArcRevisions}{langfords.csv}{}
+\end{minipage}
+\caption{Langfords problem with random heuristics.}
+\end{figure}
+\noindent
+The data for langfords of n = 3 further supports the fact that the descending static ordering performs better. However, running the maximum degree heuristic does not finish in time, which is strange. We can see the static descending order is significantly better than smallest domain first and ascending static order. The time taken is not very reliable as only one run was done, but the difference can clearly be seen. The strange issue is why the maximum degree heuristic was not able to finish in time. Perhaps this had to do with memory issues, or overhead before the solver started. However this does show that even if the heuristic should theoretically perform better, it is not always the case in practice due to other forms of overhead. 
 
 \begin{figure}[H]
 \centering
-\bargraphrandom{Langfords}{Instance}{SolverNodes}{langfords.csv}
-\caption{Langfords problem with random heuristics.}
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.7]
+\begin{axis}[
+	title = {\textbf{Solver nodes required for Langfords3-9 problem}},
+	bar width=1cm,
+	enlarge x limits=0.3,
+	ybar,
+	legend pos=south east,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First},
+	x tick label style={font=\small,text width=2cm,align=center},
+	legend pos=outer north east,
+	ylabel={SolverNodes},
+	xlabel style={yshift=-0.7cm}
+]
+
+\addplot coordinates {(Static Ascending, 785991) (Static Descending, 78369) (Smallest Domain First, 785991)};
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+%
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.7]
+\begin{axis}[
+	title = {\textbf{Solver time in seconds for Langfords3-9 problem}},
+	bar width=1cm,
+	ybar,
+	enlarge x limits=0.3,
+	legend pos=south east,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First},
+	x tick label style={font=\small,text width=2cm,align=center},
+	legend pos=outer north east,
+	ylabel={SolverTime},
+	xlabel style={yshift=-0.7cm}
+]
+
+\addplot coordinates {(Static Ascending, 140) (Static Descending, 11) (Smallest Domain First, 129)};
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\caption{Comparison of heuristics for Langfords3-9, showing the significant improvement of a static descending heuristic.}
+\end{figure}
+
+\subsection{Sudoku}
+The two sudoku problems (SimonisSudoku and FinnishSudoku) are two of the harder problems to solve. In particular, many heuristics could not solve the FinnishSudoku problem in any reasonable amount of time, long enough that little comparison could have been made. Like the Langford's problem, because of the time needed to solve the sudoku problems, multiple runs for experimentation could not be done, and so the random heuristics and time taken are not analysed. For FinnishSudoku, no heuristic except for smallest domain first was able to finish in reasonable time which shows the strength in that particular heuristic.
+\n
+Furthermore, the following heuristics did not complete the SimonisSudoku in any reasonable time:
+\begin{itemize}
+\item Fully random and random variable heuristics
+\item Maximum degree ordering
+\item Largest domain first
+\end{itemize}
+Perhaps for the sudoku problem, the least constrained variables are better suited to being solved first, which would explain why the maximum degree could not finish when the minimum degree ordering finished quite quickly. 
+
+\subsubsection*{Simonis Sudoku}
+In the graphs for the SimonisSudoku problem instance, it can be seen that the odd/even static ordering took considerably more nodes and arc revisions than all other heuristics. This is due to the way the sudoku problem is modelled. Solving all odd then even variables makes it difficult to solve entire rows and columns. In fact no full row or column will be completed until all odd variables are assigned, as the odd even heuristic will go through the variables in a diagonal pattern, causing a lot of backtracking and wipeouts. Further, the random static heuristic also performed poorly, as its order was random, meaning some rows and columns may not be solved or finished until much later. In comparison, all the other methods which stuck to a ascending or descending order got much better results. 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{Solver nodes required for Simonis Sudoku}},
+	bar width=0.5cm,
+	width=15cm,
+	height=4cm,
+	ybar,
+	enlarge x limits=0.1,
+	legend pos=south east,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Odd even,Minimum Degree,Random Static,Random Value},
+	x tick label style={font=\small,text width=2cm,align=center},
+	legend pos=outer north east,
+	ylabel={SolverNodes},
+	xlabel style={yshift=-0.7cm}
+]
+
+\addplot coordinates {(Static Ascending, 382) (Static Descending, 247) (Smallest Domain First, 81) (Odd even, 71477) (Minimum Degree, 398) (Random Static, 46142) (Random Value, 382)};
+\end{axis}
+\end{tikzpicture}
+\\
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{Solver nodes required for Simonis Sudoku}},
+	bar width=0.5cm,
+	width=15cm,
+	height=4cm,
+	ybar,
+	enlarge x limits=0.1,
+	legend pos=south east,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Minimum Degree,Random Value},
+	x tick label style={font=\small,text width=2cm,align=center},
+	legend pos=outer north east,
+	ylabel={SolverNodes},
+	xlabel style={yshift=-0.7cm}
+]
+
+\addplot coordinates {(Static Ascending, 382) (Static Descending, 247) (Smallest Domain First, 81) (Minimum Degree, 398) (Random Value, 382)};
+\end{axis}
+\end{tikzpicture}
+\caption{Solver nodes for Simonis Sudoku. The second graph does not show the odd even and random static heuristics for better comparison of the other five heuristics.}
+\label{fig:simonis1}
 \end{figure}
 
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{Arc revisions nodes required for Simonis Sudoku}},
+	bar width=0.5cm,
+	width=15cm,
+	height=4cm,
+	ybar,
+	enlarge x limits=0.1,
+	legend pos=south east,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Odd even,Minimum Degree,Random Static,Random Value},
+	x tick label style={font=\small,text width=2cm,align=center},
+	legend pos=outer north east,
+	ylabel={ArcRevisions},
+	xlabel style={yshift=-0.7cm}
+]
 
-\section{Conclusion and evaluation}
+\addplot coordinates {(Static Ascending, 32142) (Static Descending, 28841) (Smallest Domain First, 3240) (Odd even, 8689977) (Minimum Degree, 17364) (Random Static, 6551838) (Random Value, 32142)};
+\end{axis}
+\end{tikzpicture}
+\\
+\begin{tikzpicture}
+\begin{axis}[
+	title = {\textbf{Arc revisions required for Simonis Sudoku}},
+	bar width=0.5cm,
+	width=15cm,
+	height=4cm,
+	ybar,
+	enlarge x limits=0.1,
+	legend pos=south east,
+	xlabel={Heuristic},
+	xtick=data,
+	symbolic x coords = {Static Ascending,Static Descending,Smallest Domain First,Minimum Degree,Random Value},
+	x tick label style={font=\small,text width=2cm,align=center},
+	legend pos=outer north east,
+	ylabel={ArcRevisions},
+	xlabel style={yshift=-0.7cm}
+]
+
+\addplot coordinates {(Static Ascending, 32142) (Static Descending, 28841) (Smallest Domain First, 3240) (Minimum Degree, 17364) (Random Value, 32142)};
+\end{axis}
+\end{tikzpicture}
+\caption{Arc revisions for Simonis Sudoku. The second graph does not show the odd even heuristic for better comparison of the other four heuristics.}
+\end{figure}
+\noindent
+There are two more interesting points in the results for Simonis Sudoku. First, smallest domain first used the least number of revisions and solver nodes. This is similar to the N-queens problem, but contrasts with Langford's problem. This shows us that the performance of static heuristics can be very problem dependent, more so than dynamic heuristics. The is especially true the more specific a static heuristic is to a problem class, or even to a problem instance, as a static ordering can give the exact ordering of variables needed that gives the optimal search. Second, the minimum degree ordering gives more solver nodes relative to the other heuristics, but less arc revisions. This is the first case in our results where the number of nodes and revisions do not tell the exact same results. This is interesting as it means the minimum degree heuristic has a lower arc revision to search node ratio, so less revisions are done on average per branch, but more branching is done in general. This is good as it shows just looking at revisions or solver nodes it not necessarily a good enough indicator of performance. Moreover, the means the minimum degree heuristic has pruned less values, becomes more nodes had to be searched, but the additional search nodes did not require much revision.
+
+\section{Conclusion}
+In conclusion, a forward checking constraint solver was implemented. The solver was implemented to be able to take in any generic heuristic for variable and value section. Tests were written on the provided constraint satisfaction problem instances to ensure the correct number of all solutions could be found, verifying the correctness of the solver. 
+\n
+Next, different heuristics were implemented for the solver to use, which included a dynamic variable heuristic (smallest domain first) and static variable heuristics such as maximum degree. Further, random heuristics were tested to show the different affect of variable and value selection. 
+\n
+Finally, the heuristics were run on the various different problems where the time taken, number of solver nodes and number of arc revisions were measured to show the difference between the heuristics, especially the difference between a dynamic heuristic like smallest domain first, and a static heuristic like maximum degree. When looking at the N-queens problem, it appeared that static heuristics did not perform as well as dynamic heuristics. However, the Langfords' problems showed that this was not always the case, as a descending static order was able to perform significantly better than a smallest domain first heuristic. This demonstrated that a good static order built for specific problems could perform very well, but would be highly problem dependent while dynamic heuristics like smallest domain first could work well in most general cases. TODO sudoku
+
 
 \printbibliography
 
