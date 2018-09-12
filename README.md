@@ -1,3 +1,6 @@
+# constraint-solver
+This is a forward checking constraint solver with 2-way branching written in java. It can read in problems like the ones specified in `csp/` and output the solution.
+
 ## Tests
 To run the tests, run `ant junit` in the project directory. To keep the tests small and running, tests for more difficult problems and heuristics that take a long time are not included. 
 
